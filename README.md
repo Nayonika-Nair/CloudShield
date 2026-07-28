@@ -26,19 +26,10 @@ Some common issues include:
 - Publicly accessible RDS databases.
 - Unexpected increases in AWS bills caused by forgotten resources.
 
-Although AWS provides several services to monitor these aspects individually, managing them requires technical expertise and switching between multiple dashboards. CloudShield addresses this challenge by offering a unified interface that evaluates both security posture and cost efficiency while providing easy-to-understand recommendations.
-
----
 
 # Target Users (Personas)
 
 ## 1. Cloud Administrator
-
-**Responsibilities**
-
-- Manage AWS infrastructure.
-- Monitor cloud resources.
-- Ensure secure cloud configurations.
 
 **Goals**
 
@@ -50,12 +41,6 @@ Although AWS provides several services to monitor these aspects individually, ma
 
 ## 2. DevOps Engineer
 
-**Responsibilities**
-
-- Deploy and maintain cloud applications.
-- Manage CI/CD pipelines.
-- Monitor infrastructure performance.
-
 **Goals**
 
 - Detect cloud misconfigurations.
@@ -65,12 +50,6 @@ Although AWS provides several services to monitor these aspects individually, ma
 ---
 
 ## 3. Security Analyst
-
-**Responsibilities**
-
-- Monitor cloud security posture.
-- Investigate security alerts.
-- Ensure compliance with security best practices.
 
 **Goals**
 
@@ -82,10 +61,6 @@ Although AWS provides several services to monitor these aspects individually, ma
 
 ## 4. Startup Founder / Small Business Owner
 
-**Responsibilities**
-
-- Manage cloud infrastructure with limited budgets.
-
 **Goals**
 
 - Reduce AWS spending.
@@ -95,11 +70,6 @@ Although AWS provides several services to monitor these aspects individually, ma
 ---
 
 ## 5. Students & Cloud Learners
-
-**Responsibilities**
-
-- Learn AWS cloud services.
-- Build and deploy cloud applications.
 
 **Goals**
 
@@ -180,8 +150,6 @@ Generate reports containing:
 ---
 
 # Success Metrics
-
-The success of CloudShield will be evaluated using measurable technical and user-focused metrics.
 
 ### Functional Metrics
 
