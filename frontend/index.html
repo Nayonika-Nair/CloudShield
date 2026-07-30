@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CloudShield — Interactive Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060814;
+    --bg-2:#0a0e22;
+    --panel:rgba(16,22,45,0.62);
+    --panel-solid:#0d1230;
+    --border:rgba(120,150,255,0.14);
+    --border-strong:rgba(120,180,255,0.32);
+    --cyan:#22d3ee;
+    --cyan-soft:rgba(34,211,238,0.15);
+    --violet:#8b6ff8;
+    --violet-soft:rgba(139,111,248,0.16);
+    --green:#34d399;
+    --amber:#fbbf24;
+    --red:#f87171;
+    --text:#e8ecff;
+    --text-dim:#8c93b8;
+    --text-faint:#5b6288;
+    --radius:16px;
+    --font-display:'Space Grotesk',sans-serif;
+    --font-body:'Inter',sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:var(--font-body);
+    background:var(--bg);
+    color:var(--text);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- Animated background ---------- */
+  .bg-layer{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  .bg-grid{
+    background-image:
+      linear-gradient(to right, rgba(120,150,255,0.055) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(120,150,255,0.055) 1px, transparent 1px);
+    background-size:42px 42px;
+    mask-image:radial-gradient(ellipse 80% 60% at 50% 20%, black 40%, transparent 85%);
+  }
+  .bg-blob{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(90px);
+    opacity:0.35;
+    animation:drift 22s ease-in-out infinite;
+  }
+  .bg-blob.b1{width:520px;height:520px;background:radial-gradient(circle, var(--cyan), transparent 70%);top:-160px;left:-120px;animation-delay:0s;}
+  .bg-blob.b2{width:600px;height:600px;background:radial-gradient(circle, var(--violet), transparent 70%);bottom:-220px;right:-160px;animation-delay:-8s;}
+  .bg-blob.b3{width:380px;height:380px;background:radial-gradient(circle, #2b6fff, transparent 70%);top:40%;left:60%;animation-delay:-14s;opacity:0.22;}
+  @keyframes drift{
+    0%,100%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(40px,-30px) scale(1.08);}
+  }
+  .bg-scanline{
+    position:absolute; inset:0;
+    background:linear-gradient(to bottom, transparent 0%, rgba(34,211,238,0.035) 50%, transparent 100%);
+    height:200%;
+    animation:scan 9s linear infinite;
+  }
+  @keyframes scan{
+    0%{transform:translateY(-50%);}
+    100%{transform:translateY(0%);}
+  }
+
+  /* ---------- App shell ---------- */
+  #root{position:relative;z-index:1;height:100vh;width:100vw;}
+  .hidden{display:none !important;}
+  .fade-in{animation:fadeIn .45s ease both;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  /* ---------- Shared: glass panel ---------- */
+  .glass{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+  }
+  .glass:hover{border-color:var(--border-strong);}
+
+  /* ---------- Login ---------- */
+  #view-login{height:100%; display:flex; align-items:center; justify-content:center;}
+  .login-wrap{
+    width:min(920px, 92vw);
+    display:grid; grid-template-columns:1.1fr 1fr;
+    border-radius:24px; overflow:hidden;
+    border:1px solid var(--border-strong);
+    box-shadow:0 40px 120px -30px rgba(34,211,238,0.15), 0 0 0 1px rgba(255,255,255,0.02);
+  }
+  .login-brand{
+    position:relative;
+    padding:56px 44px;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(34,211,238,0.25), transparent 55%),
+      radial-gradient(circle at 80% 80%, rgba(139,111,248,0.28), transparent 55%),
+      linear-gradient(160deg, #0a0f28, #050712);
+    display:flex; flex-direction:column; justify-content:space-between;
+  }
+  .shield-mark{
+    width:64px;height:64px; position:relative;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .shield-mark svg{width:100%;height:100%;filter:drop-shadow(0 0 14px rgba(34,211,238,0.65));}
+  .ring{
+    position:absolute; inset:-14px; border-radius:50%;
+    border:1px solid rgba(34,211,238,0.4);
+    animation:pulse-ring 2.6s ease-out infinite;
+  }
+  @keyframes pulse-ring{
+    0%{transform:scale(0.7); opacity:0.9;}
+    100%{transform:scale(1.5); opacity:0;}
+  }
+  .brand-title{font-family:var(--font-display); font-size:26px; font-weight:600; margin-top:22px; letter-spacing:0.3px;}
+  .brand-sub{color:var(--text-dim); font-size:13.5px; margin-top:10px; line-height:1.6; max-width:320px;}
+  .brand-stats{display:flex; gap:28px; margin-top:40px;}
+  .brand-stat b{display:block; font-family:var(--font-mono); font-size:20px; color:var(--cyan);}
+  .brand-stat span{font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.6px;}
+
+  .login-form{background:var(--panel-solid); padding:56px 48px; display:flex; flex-direction:column; justify-content:center;}
+  .login-form h1{font-family:var(--font-display); font-size:24px; font-weight:600;}
+  .login-form p.sub{color:var(--text-dim); font-size:13px; margin-top:8px; margin-bottom:32px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block; font-size:11.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;}
+  .field input{
+    width:100%; padding:13px 14px; border-radius:10px;
+    background:rgba(255,255,255,0.03); border:1px solid var(--border);
+    color:var(--text); font-family:var(--font-body); font-size:13.5px;
+    outline:none; transition:border-color .2s, box-shadow .2s;
+  }
+  .field input:focus{border-color:var(--cyan); box-shadow:0 0 0 3px var(--cyan-soft);}
+  .forgot{font-size:12px; color:var(--cyan); text-align:right; display:block; margin:-8px 0 22px; cursor:pointer;}
+  .btn-primary{
+    width:100%; padding:14px; border:none; border-radius:10px; cursor:pointer;
+    background:linear-gradient(135deg, var(--cyan), #4f8bff);
+    color:#04101a; font-weight:700; font-size:14px; font-family:var(--font-body);
+    box-shadow:0 10px 30px -8px rgba(34,211,238,0.55);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary:hover{transform:translateY(-1px); box-shadow:0 14px 34px -6px rgba(34,211,238,0.7);}
+  .btn-primary:active{transform:translateY(0);}
+  .login-foot{margin-top:22px; text-align:center; font-size:12.5px; color:var(--text-dim);}
+  .login-foot a{color:var(--cyan); cursor:pointer; text-decoration:none;}
+
+  /* ---------- App layout ---------- */
+  #view-app{display:grid; grid-template-columns:220px 1fr; height:100%;}
+  .sidebar{
+    background:rgba(9,12,28,0.75); border-right:1px solid var(--border);
+    backdrop-filter:blur(18px); padding:22px 14px; display:flex; flex-direction:column;
+  }
+  .sidebar-brand{display:flex; align-items:center; gap:10px; padding:6px 10px 26px;}
+  .sidebar-brand .shield-mark{width:26px;height:26px;}
+  .sidebar-brand .shield-mark .ring{display:none;}
+  .sidebar-brand span{font-family:var(--font-display); font-weight:600; font-size:15px;}
+  .nav-item{
+    display:flex; align-items:center; gap:11px;
+    padding:11px 12px; border-radius:10px; margin-bottom:4px;
+    color:var(--text-dim); font-size:13px; font-weight:500; cursor:pointer;
+    border:1px solid transparent; transition:all .15s ease; position:relative;
+  }
+  .nav-item svg{width:16px;height:16px; opacity:0.85; flex-shrink:0;}
+  .nav-item:hover{color:var(--text); background:rgba(255,255,255,0.03);}
+  .nav-item.active{
+    color:#eafcff; background:linear-gradient(90deg, var(--cyan-soft), transparent);
+    border-color:rgba(34,211,238,0.35);
+  }
+  .nav-item.active::before{
+    content:''; position:absolute; left:-14px; top:50%; transform:translateY(-50%);
+    width:3px; height:60%; background:var(--cyan); border-radius:2px;
+    box-shadow:0 0 10px var(--cyan);
+  }
+  .nav-spacer{flex:1;}
+  .nav-foot{padding:12px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid var(--border);}
+  .nav-foot .row{display:flex; align-items:center; gap:9px;}
+  .avatar-dot{width:30px;height:30px;border-radius:50%; background:linear-gradient(135deg,var(--cyan),var(--violet)); flex-shrink:0;}
+  .nav-foot b{font-size:12px; display:block;}
+  .nav-foot span{font-size:10.5px; color:var(--text-faint);}
+
+  .main{overflow-y:auto; height:100vh;}
+  .topbar{
+    position:sticky; top:0; z-index:5;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 32px; border-bottom:1px solid var(--border);
+    background:rgba(6,8,20,0.6); backdrop-filter:blur(14px);
+  }
+  .topbar h1{font-family:var(--font-display); font-size:19px; font-weight:600;}
+  .topbar .eyebrow{font-size:11px; color:var(--text-faint); letter-spacing:0.5px; text-transform:uppercase; margin-bottom:2px;}
+  .topbar-right{display:flex; align-items:center; gap:14px;}
+  .search{
+    display:flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,0.03); border:1px solid var(--border);
+    border-radius:9px; padding:8px 12px; width:230px;
+  }
+  .search input{background:none; border:none; outline:none; color:var(--text); font-size:12.5px; width:100%;}
+  .search svg{width:14px;height:14px; color:var(--text-faint); flex-shrink:0;}
+  .icon-btn{width:34px;height:34px;border-radius:9px; background:rgba(255,255,255,0.03); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-dim); position:relative;}
+  .icon-btn:hover{border-color:var(--border-strong); color:var(--text);}
+  .icon-btn svg{width:15px;height:15px;}
+  .dot-alert{position:absolute; top:6px; right:6px; width:6px;height:6px;border-radius:50%; background:var(--red); box-shadow:0 0 6px var(--red);}
+
+  .content{padding:28px 32px 60px;}
+
+  /* ---------- Stat cards ---------- */
+  .stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:22px;}
+  .stat-card{padding:20px;}
+  .stat-card .label{font-size:11.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.4px;}
+  .stat-card .value{font-family:var(--font-mono); font-size:25px; font-weight:600; margin-top:10px;}
+  .stat-card .delta{font-size:11px; margin-top:6px; display:flex; align-items:center; gap:4px;}
+  .up{color:var(--green);} .down{color:var(--red);} .flat{color:var(--text-faint);}
+
+  /* ---------- Two column ---------- */
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;}
+  .panel{padding:22px;}
+  .panel-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;}
+  .panel-head h3{font-family:var(--font-display); font-size:14.5px; font-weight:600;}
+  .panel-head .tag{font-size:10.5px; color:var(--text-faint); font-family:var(--font-mono);}
+
+  /* Gauge */
+  .gauge-wrap{display:flex; align-items:center; gap:22px;}
+  .gauge{width:140px; height:140px; position:relative;}
+  .gauge svg{transform:rotate(-90deg);}
+  .gauge-num{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .gauge-num b{font-family:var(--font-mono); font-size:26px;}
+  .gauge-num span{font-size:10px; color:var(--text-faint);}
+  .risk-breakdown{flex:1;}
+  .risk-row{display:flex; align-items:center; gap:10px; margin-bottom:11px; font-size:12px;}
+  .risk-row .chip{width:8px;height:8px;border-radius:2px;}
+  .risk-row .name{flex:1; color:var(--text-dim);}
+  .risk-row b{font-family:var(--font-mono);}
+
+  /* Bar chart (cost trend) */
+  .bar-chart{display:flex; align-items:flex-end; gap:8px; height:150px; padding-top:10px;}
+  .bar{flex:1; border-radius:5px 5px 0 0; background:linear-gradient(180deg, var(--cyan), rgba(34,211,238,0.15)); position:relative; cursor:pointer; transition:filter .15s;}
+  .bar:hover{filter:brightness(1.3);}
+  .bar:hover .bar-tip{opacity:1; transform:translate(-50%,-6px);}
+  .bar-tip{
+    position:absolute; bottom:100%; left:50%; transform:translate(-50%,0); opacity:0;
+    background:#0d1230; border:1px solid var(--border-strong); padding:4px 8px; border-radius:6px;
+    font-size:10.5px; font-family:var(--font-mono); white-space:nowrap; transition:all .15s; pointer-events:none;
+  }
+
+  /* Alerts */
+  .alert-row{display:flex; align-items:center; gap:14px; padding:13px 4px; border-bottom:1px solid var(--border);}
+  .alert-row:last-child{border-bottom:none;}
+  .alert-dot{width:8px;height:8px;border-radius:50%; flex-shrink:0;}
+  .alert-row .txt{flex:1;}
+  .alert-row .txt b{display:block; font-size:12.5px; font-weight:500;}
+  .alert-row .txt span{font-size:11px; color:var(--text-faint); font-family:var(--font-mono);}
+
+  .badge{
+    display:inline-flex; align-items:center; padding:4px 10px; border-radius:20px;
+    font-size:10.5px; font-weight:700; letter-spacing:0.3px; text-transform:uppercase;
+  }
+  .badge.high{background:rgba(248,113,113,0.14); color:var(--red); border:1px solid rgba(248,113,113,0.35);}
+  .badge.medium{background:rgba(251,191,36,0.14); color:var(--amber); border:1px solid rgba(251,191,36,0.35);}
+  .badge.low{background:rgba(52,211,153,0.14); color:var(--green); border:1px solid rgba(52,211,153,0.35);}
+  .badge.ready{background:rgba(52,211,153,0.14); color:var(--green); border:1px solid rgba(52,211,153,0.35);}
+  .badge.processing{background:rgba(251,191,36,0.14); color:var(--amber); border:1px solid rgba(251,191,36,0.35); animation:blink 1.4s ease infinite;}
+  @keyframes blink{0%,100%{opacity:1;} 50%{opacity:0.55;}}
+
+  /* ---------- Filters / tabs ---------- */
+  .filter-bar{display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap;}
+  .chip-btn{
+    padding:8px 14px; border-radius:8px; font-size:12px; font-weight:500; cursor:pointer;
+    background:rgba(255,255,255,0.02); border:1px solid var(--border); color:var(--text-dim);
+    transition:all .15s;
+  }
+  .chip-btn:hover{border-color:var(--border-strong); color:var(--text);}
+  .chip-btn.active{background:var(--cyan-soft); border-color:rgba(34,211,238,0.5); color:var(--cyan);}
+  .spacer{flex:1;}
+  .btn-accent{
+    padding:9px 16px; border-radius:8px; border:none; cursor:pointer;
+    background:linear-gradient(135deg, var(--cyan), #4f8bff); color:#04101a; font-weight:700; font-size:12px;
+  }
+  .btn-ghost{
+    padding:9px 16px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:600;
+    background:transparent; border:1px solid var(--border-strong); color:var(--text);
+  }
+
+  .tabs{display:flex; gap:6px; margin-bottom:18px; border-bottom:1px solid var(--border); padding-bottom:0;}
+  .tab{padding:11px 4px; margin-right:22px; font-size:13px; color:var(--text-dim); cursor:pointer; border-bottom:2px solid transparent; font-weight:500;}
+  .tab:hover{color:var(--text);}
+  .tab.active{color:var(--text); border-bottom-color:var(--cyan);}
+
+  /* ---------- Table ---------- */
+  table{width:100%; border-collapse:collapse;}
+  thead th{
+    text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:0.4px;
+    color:var(--text-faint); font-weight:600; padding:0 10px 12px; border-bottom:1px solid var(--border);
+  }
+  tbody td{padding:14px 10px; font-size:12.5px; border-bottom:1px solid rgba(120,150,255,0.06); color:var(--text-dim);}
+  tbody tr{transition:background .15s;}
+  tbody tr:hover{background:rgba(255,255,255,0.025);}
+  tbody tr:last-child td{border-bottom:none;}
+  td.strong{color:var(--text); font-weight:500;}
+  td.mono{font-family:var(--font-mono); font-size:11.5px;}
+  .row-fade{animation:fadeIn .3s ease both;}
+
+  .link-btn{color:var(--cyan); cursor:pointer; font-weight:600; font-size:12px;}
+  .link-btn:hover{text-decoration:underline;}
+
+  /* ---------- Cost recs ---------- */
+  .rec-row{display:grid; grid-template-columns:1.4fr 1fr 1fr 1.6fr 0.8fr 0.9fr; align-items:center; gap:10px; padding:14px 4px; border-bottom:1px solid rgba(120,150,255,0.06); font-size:12.5px;}
+  .rec-row.header{color:var(--text-faint); font-size:10.5px; text-transform:uppercase; letter-spacing:0.4px; border-bottom:1px solid var(--border); padding-bottom:12px;}
+  .rec-row:last-child{border-bottom:none;}
+  .apply-btn{
+    padding:7px 12px; border-radius:7px; font-size:11px; font-weight:700; cursor:pointer; text-align:center;
+    background:rgba(34,211,238,0.12); border:1px solid rgba(34,211,238,0.4); color:var(--cyan);
+    transition:all .15s;
+  }
+  .apply-btn:hover{background:var(--cyan); color:#04101a;}
+  .apply-btn.applied{background:rgba(52,211,153,0.15); border-color:rgba(52,211,153,0.5); color:var(--green); cursor:default;}
+
+  /* ---------- Report cards ---------- */
+  .report-cards{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px;}
+  .report-card{padding:22px; cursor:pointer; transition:all .18s;}
+  .report-card:hover{transform:translateY(-3px); box-shadow:0 16px 40px -12px rgba(34,211,238,0.25);}
+  .report-card.selected{border-color:var(--cyan); background:linear-gradient(160deg, var(--cyan-soft), var(--panel));}
+  .report-icon{width:38px;height:38px;border-radius:10px; background:var(--violet-soft); display:flex; align-items:center; justify-content:center; margin-bottom:16px;}
+  .report-icon svg{width:18px;height:18px; color:var(--violet);}
+  .report-card h4{font-size:14px; font-weight:600; margin-bottom:6px;}
+  .report-card p{font-size:11.5px; color:var(--text-dim); line-height:1.5;}
+
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-thumb{background:rgba(120,150,255,0.18); border-radius:6px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  @media (max-width:980px){
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .grid-2{grid-template-columns:1fr;}
+    .report-cards{grid-template-columns:1fr;}
+    .rec-row{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-layer bg-grid"></div>
+<div class="bg-layer"><div class="bg-blob b1"></div><div class="bg-blob b2"></div><div class="bg-blob b3"></div></div>
+<div class="bg-layer bg-scanline"></div>
+
+<div id="root">
+
+  <!-- ============ LOGIN ============ -->
+  <div id="view-login">
+    <div class="login-wrap fade-in">
+      <div class="login-brand">
+        <div>
+          <div class="shield-mark">
+            <div class="ring"></div>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 5v6c0 5.2 3.4 9.7 8 11 4.6-1.3 8-5.8 8-11V5l-8-3z" fill="url(#g1)"/><path d="M9 12l2 2 4-4" stroke="#04141c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="g1" x1="4" y1="2" x2="20" y2="22"><stop stop-color="#22d3ee"/><stop offset="1" stop-color="#8b6ff8"/></linearGradient></defs></svg>
+          </div>
+          <div class="brand-title">CloudShield</div>
+          <div class="brand-sub">Real-time security posture and cost intelligence for your AWS environment — one console, continuously watching.</div>
+        </div>
+        <div class="brand-stats">
+          <div class="brand-stat"><b>142</b><span>Resources Watched</span></div>
+          <div class="brand-stat"><b>78/100</b><span>Security Score</span></div>
+          <div class="brand-stat"><b>$1,120</b><span>Savings Found</span></div>
+        </div>
+      </div>
+      <div class="login-form">
+        <h1>Sign in</h1>
+        <p class="sub">Access your cloud security &amp; cost dashboard</p>
+        <div class="field">
+          <label>Email address</label>
+          <input type="email" placeholder="you@company.com" value="admin@cloudshield.io">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" placeholder="••••••••••" value="••••••••••">
+        </div>
+        <span class="forgot">Forgot password?</span>
+        <button class="btn-primary" onclick="login()">Log in</button>
+        <div class="login-foot">Don't have an account? <a>Sign up</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ APP ============ -->
+  <div id="view-app" class="hidden">
+    <div class="sidebar">
+      <div class="sidebar-brand">
+        <div class="shield-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 5v6c0 5.2 3.4 9.7 8 11 4.6-1.3 8-5.8 8-11V5l-8-3z" fill="url(#g2)"/><path d="M9 12l2 2 4-4" stroke="#04141c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="g2" x1="4" y1="2" x2="20" y2="22"><stop stop-color="#22d3ee"/><stop offset="1" stop-color="#8b6ff8"/></linearGradient></defs></svg></div>
+        <span>CloudShield</span>
+      </div>
+
+      <div class="nav-item active" data-view="dashboard" onclick="go('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" data-view="security" onclick="go('security')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 3v6c0 5-3.4 9.4-8 10.5C7.4 20.4 4 16 4 11V5l8-3z"/></svg>
+        Security Findings
+      </div>
+      <div class="nav-item" data-view="cost" onclick="go('cost')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M15 9.5c0-1.4-1.3-2.5-3-2.5s-3 1-3 2.3c0 3 6 1.5 6 4.5 0 1.4-1.3 2.4-3 2.4s-3-1-3-2.4"/></svg>
+        Cost Optimization
+      </div>
+      <div class="nav-item" data-view="inventory" onclick="go('inventory')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="16" width="18" height="4" rx="1"/></svg>
+        Resource Inventory
+      </div>
+      <div class="nav-item" data-view="reports" onclick="go('reports')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></svg>
+        Reports
+      </div>
+
+      <div class="nav-spacer"></div>
+      <div class="nav-foot">
+        <div class="row">
+          <div class="avatar-dot"></div>
+          <div>
+            <b>Nayonika N.</b>
+            <span>Cloud Administrator</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <div class="eyebrow" id="topbar-eyebrow">Overview</div>
+          <h1 id="topbar-title">Dashboard</h1>
+        </div>
+        <div class="topbar-right">
+          <div class="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input placeholder="Search resources...">
+          </div>
+          <div class="icon-btn"><div class="dot-alert"></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg></div>
+          <div class="icon-btn" onclick="logout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg></div>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <!-- ---- DASHBOARD ---- -->
+        <section id="sec-dashboard">
+          <div class="stat-grid">
+            <div class="glass stat-card"><div class="label">Security Score</div><div class="value" style="color:var(--amber)">78 / 100</div><div class="delta up">▲ 4 pts this week</div></div>
+            <div class="glass stat-card"><div class="label">Monthly Cost</div><div class="value">$4,215</div><div class="delta down">▲ 6% vs last month</div></div>
+            <div class="glass stat-card"><div class="label">Potential Savings</div><div class="value" style="color:var(--green)">$1,120/mo</div><div class="delta up">12 opportunities found</div></div>
+            <div class="glass stat-card"><div class="label">Active Resources</div><div class="value">142</div><div class="delta flat">Across 4 regions</div></div>
+          </div>
+
+          <div class="grid-2">
+            <div class="glass panel">
+              <div class="panel-head"><h3>Security Risk Breakdown</h3><span class="tag">LIVE</span></div>
+              <div class="gauge-wrap">
+                <div class="gauge">
+                  <svg width="140" height="140" viewBox="0 0 140 140">
+                    <circle cx="70" cy="70" r="58" fill="none" stroke="rgba(120,150,255,0.12)" stroke-width="12"/>
+                    <circle cx="70" cy="70" r="58" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-linecap="round" stroke-dasharray="364" stroke-dashoffset="80"/>
+                    <defs><linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fbbf24"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs>
+                  </svg>
+                  <div class="gauge-num"><b>78</b><span>/ 100</span></div>
+                </div>
+                <div class="risk-breakdown">
+                  <div class="risk-row"><div class="chip" style="background:var(--red)"></div><div class="name">High risk</div><b>12</b></div>
+                  <div class="risk-row"><div class="chip" style="background:var(--amber)"></div><div class="name">Medium risk</div><b>23</b></div>
+                  <div class="risk-row"><div class="chip" style="background:var(--green)"></div><div class="name">Low risk</div><b>9</b></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="glass panel">
+              <div class="panel-head"><h3>Cost Trend — 30 Days</h3><span class="tag">USD / DAY</span></div>
+              <div class="bar-chart" id="cost-bars"></div>
+            </div>
+          </div>
+
+          <div class="glass panel">
+            <div class="panel-head"><h3>Recent Alerts</h3><span class="link-btn" onclick="go('security')">View all →</span></div>
+            <div id="alert-list"></div>
+          </div>
+        </section>
+
+        <!-- ---- SECURITY FINDINGS ---- -->
+        <section id="sec-security" class="hidden">
+          <div class="stat-grid">
+            <div class="glass stat-card"><div class="label">High Risk</div><div class="value" style="color:var(--red)">12</div></div>
+            <div class="glass stat-card"><div class="label">Medium Risk</div><div class="value" style="color:var(--amber)">23</div></div>
+            <div class="glass stat-card"><div class="label">Low Risk</div><div class="value" style="color:var(--green)">9</div></div>
+            <div class="glass stat-card"><div class="label">Overall Score</div><div class="value">78/100</div></div>
+          </div>
+
+          <div class="filter-bar">
+            <div class="chip-btn active" data-sev="all" onclick="filterFindings('all', this)">All</div>
+            <div class="chip-btn" data-sev="high" onclick="filterFindings('high', this)">High</div>
+            <div class="chip-btn" data-sev="medium" onclick="filterFindings('medium', this)">Medium</div>
+            <div class="chip-btn" data-sev="low" onclick="filterFindings('low', this)">Low</div>
+            <div class="spacer"></div>
+            <div class="btn-accent" onclick="runScan()">Run Scan</div>
+          </div>
+
+          <div class="glass panel">
+            <table>
+              <thead><tr><th>Finding</th><th>Resource</th><th>Severity</th><th>Status</th><th>Detected</th></tr></thead>
+              <tbody id="findings-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ---- COST OPTIMIZATION ---- -->
+        <section id="sec-cost" class="hidden">
+          <div class="stat-grid">
+            <div class="glass stat-card"><div class="label">Current Monthly Spend</div><div class="value">$4,215</div></div>
+            <div class="glass stat-card"><div class="label">Potential Monthly Savings</div><div class="value" style="color:var(--green)" id="savings-total">$1,120</div></div>
+            <div class="glass stat-card"><div class="label">Idle EC2 Instances</div><div class="value" style="color:var(--amber)">6</div></div>
+            <div class="glass stat-card"><div class="label">Unattached EBS Volumes</div><div class="value" style="color:var(--amber)">9</div></div>
+          </div>
+
+          <div class="glass panel" style="margin-bottom:16px;">
+            <div class="panel-head"><h3>Spend vs. Optimized Forecast</h3><span class="tag">USD / DAY</span></div>
+            <div class="bar-chart" id="cost-bars-2"></div>
+          </div>
+
+          <div class="glass panel">
+            <div class="panel-head"><h3>Cost Recommendations</h3></div>
+            <div class="rec-row header"><div>Resource</div><div>Type</div><div>Current Cost</div><div>Recommendation</div><div>Savings</div><div></div></div>
+            <div id="rec-list"></div>
+          </div>
+        </section>
+
+        <!-- ---- RESOURCE INVENTORY ---- -->
+        <section id="sec-inventory" class="hidden">
+          <div class="tabs">
+            <div class="tab active" data-tab="ec2" onclick="switchTab('ec2', this)">EC2 Instances</div>
+            <div class="tab" data-tab="s3" onclick="switchTab('s3', this)">S3 Buckets</div>
+            <div class="tab" data-tab="rds" onclick="switchTab('rds', this)">RDS Databases</div>
+            <div class="tab" data-tab="iam" onclick="switchTab('iam', this)">IAM Users &amp; Roles</div>
+          </div>
+          <div class="glass panel">
+            <div class="panel-head"><h3 id="inv-title">EC2 Instances (24)</h3><div class="btn-accent" onclick="syncAws()">+ Sync from AWS</div></div>
+            <table>
+              <thead id="inv-head"></thead>
+              <tbody id="inv-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ---- REPORTS ---- -->
+        <section id="sec-reports" class="hidden">
+          <div class="panel-head" style="margin-bottom:14px;"><h3 style="font-size:15px;">Generate a New Report</h3></div>
+          <div class="report-cards" id="report-cards"></div>
+          <div class="btn-accent" style="width:fit-content; padding:12px 22px; margin-bottom:26px;" onclick="generateReport()">Generate Report</div>
+
+          <div class="glass panel">
+            <div class="panel-head"><h3>Report History</h3></div>
+            <table>
+              <thead><tr><th>Report Name</th><th>Type</th><th>Generated On</th><th>Status</th><th></th></tr></thead>
+              <tbody id="report-history"></tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- Data ---------------- */
+const alerts = [
+  ["Public S3 bucket detected", "customer-data-backup", "high"],
+  ["EC2 instance idle 14 days", "i-0af23bcd991", "medium"],
+  ["IAM user missing MFA", "svc-deploy-bot", "high"],
+  ["Unattached EBS volume", "vol-0912ffeaa", "low"],
+  ["Security Group open to 0.0.0.0/0 on port 22", "sg-04af882", "high"],
+];
+
+const findings = [
+  ["Publicly accessible S3 bucket", "customer-data-backup", "high", "Open", "2 days ago"],
+  ["Security Group allows 0.0.0.0/0 on port 22 (SSH)", "sg-04af882e1", "high", "Open", "2 days ago"],
+  ["IAM user without MFA enabled", "svc-deploy-bot", "high", "Open", "3 days ago"],
+  ["Publicly accessible RDS instance", "prod-db-cluster", "high", "Open", "3 days ago"],
+  ["Unencrypted EBS volume", "vol-0912ffeaa", "medium", "Open", "4 days ago"],
+  ["Security Group allows 0.0.0.0/0 on port 3389 (RDP)", "sg-0a2c9910", "high", "Open", "5 days ago"],
+  ["Old snapshot older than 90 days", "snap-0281ee331", "low", "Acknowledged", "6 days ago"],
+  ["S3 bucket without encryption", "app-logs-archive", "medium", "Open", "6 days ago"],
+  ["IAM policy grants full admin access", "role-ci-cd-pipeline", "medium", "Resolved", "8 days ago"],
+  ["Root account access key detected", "root", "high", "Open", "9 days ago"],
+];
+
+const recs = [
+  ["i-0af23bcd991", "EC2 (idle 14d)", "$62/mo", "Stop or downsize instance", "$62/mo"],
+  ["vol-0912ffeaa", "EBS (unattached)", "$18/mo", "Delete unattached volume", "$18/mo"],
+  ["eip-0a2f991", "Elastic IP (unused)", "$4/mo", "Release unused IP", "$4/mo"],
+  ["snap-0281ee331", "Snapshot (90+ days)", "$9/mo", "Archive or delete old snapshot", "$9/mo"],
+  ["i-0bc77aa213", "EC2 (oversized)", "$140/mo", "Right-size to t3.medium", "$70/mo"],
+  ["s3-app-logs-archive", "S3 (infrequent access)", "$31/mo", "Move to Glacier storage class", "$22/mo"],
+];
+
+const inventories = {
+  ec2: {
+    title: "EC2 Instances (24)",
+    head: ["Instance ID","Type","Region","State","Public IP","Cost/mo","Utilization"],
+    rows: [
+      ["i-0af23bcd991","t3.large","us-east-1","Running","34.221.10.4","$62","3%","amber"],
+      ["i-0bc77aa213","m5.xlarge","us-east-1","Running","—","$140","12%","amber"],
+      ["i-0cd88bb442","t3.medium","us-west-2","Running","52.14.98.2","$31","68%","green"],
+      ["i-0ef99cc551","t3.small","us-east-1","Stopped","—","$0","—","dim"],
+      ["i-0fa11dd662","c5.large","eu-west-1","Running","18.203.44.9","$74","81%","green"],
+      ["i-0gb22ee773","t3.large","us-east-1","Running","3.91.201.7","$62","5%","amber"],
+    ]
+  },
+  s3: {
+    title: "S3 Buckets (18)",
+    head: ["Bucket Name","Region","Public Access","Encryption","Size","Cost/mo"],
+    rows: [
+      ["customer-data-backup","us-east-1","Public","Disabled","412 GB","$9.50","red"],
+      ["app-logs-archive","us-east-1","Private","Disabled","1.2 TB","$27.60","amber"],
+      ["static-assets-prod","us-west-2","Public (CDN)","Enabled","88 GB","$2.00","green"],
+      ["terraform-state","eu-west-1","Private","Enabled","2 GB","$0.10","green"],
+    ]
+  },
+  rds: {
+    title: "RDS Databases (5)",
+    head: ["Identifier","Engine","Public Access","Multi-AZ","Cost/mo","Status"],
+    rows: [
+      ["prod-db-cluster","PostgreSQL 15","Yes","Yes","$310","red"],
+      ["staging-db","MySQL 8.0","No","No","$85","green"],
+      ["analytics-readonly","PostgreSQL 14","No","Yes","$140","green"],
+    ]
+  },
+  iam: {
+    title: "IAM Users & Roles (31)",
+    head: ["Name","Type","MFA Enabled","Last Active","Access Level"],
+    rows: [
+      ["svc-deploy-bot","User","No","Today","Admin","red"],
+      ["root","Root Account","No","4 days ago","Full Access","red"],
+      ["role-ci-cd-pipeline","Role","N/A","Today","Admin","amber"],
+      ["j.smith","User","Yes","Today","ReadOnly","green"],
+    ]
+  }
+};
+
+const reportTypes = [
+  { title:"Security Report", desc:"Full findings, risk scores, remediation steps" },
+  { title:"Cost Optimization Report", desc:"Spend breakdown, waste, savings opportunities" },
+  { title:"Full Infrastructure Report", desc:"Combined security, cost, and inventory summary" },
+];
+
+let reportHistory = [
+  ["Weekly Security Summary","Security","Jul 28, 2026","ready"],
+  ["July Cost Optimization Report","Cost","Jul 25, 2026","ready"],
+  ["Full Infra Audit — Q2","Full","Jul 10, 2026","ready"],
+  ["Security Report — MFA Compliance","Security","Jul 05, 2026","ready"],
+];
+
+/* ---------------- Render helpers ---------------- */
+function badge(sev){ return `<span class="badge ${sev}">${sev}</span>`; }
+
+function renderAlerts(){
+  const el = document.getElementById('alert-list');
+  el.innerHTML = alerts.map(a => `
+    <div class="alert-row">
+      <div class="alert-dot" style="background:var(--${a[2]==='high'?'red':a[2]==='medium'?'amber':'green'})"></div>
+      <div class="txt"><b>${a[0]}</b><span>${a[1]}</span></div>
+      ${badge(a[2])}
+    </div>`).join('');
+}
+
+function renderBars(targetId, seed){
+  const el = document.getElementById(targetId);
+  const vals = seed || [62,70,55,80,66,90,74,68,85,60,72,95,88,64,77,69,58,81,73,66,90,84,70,62,75,80,67,71,88,92];
+  el.innerHTML = vals.map(v => `<div class="bar" style="height:${v}%"><div class="bar-tip">$${(v*4.1).toFixed(0)}</div></div>`).join('');
+}
+
+function renderFindings(filter){
+  const body = document.getElementById('findings-body');
+  const list = filter && filter !== 'all' ? findings.filter(f => f[2] === filter) : findings;
+  body.innerHTML = list.map(f => `
+    <tr class="row-fade">
+      <td class="strong">${f[0]}</td>
+      <td class="mono">${f[1]}</td>
+      <td>${badge(f[2])}</td>
+      <td>${f[3]}</td>
+      <td>${f[4]}</td>
+    </tr>`).join('');
+}
+
+function renderRecs(){
+  const el = document.getElementById('rec-list');
+  el.innerHTML = recs.map((r,i) => `
+    <div class="rec-row">
+      <div class="mono strong">${r[0]}</div>
+      <div>${r[1]}</div>
+      <div>${r[2]}</div>
+      <div>${r[3]}</div>
+      <div style="color:var(--green); font-weight:700;">${r[4]}</div>
+      <div class="apply-btn" id="apply-${i}" onclick="applyRec(${i})">Apply</div>
+    </div>`).join('');
+}
+
+function renderInventory(key){
+  const data = inventories[key];
+  document.getElementById('inv-title').textContent = data.title;
+  document.getElementById('inv-head').innerHTML = '<tr>' + data.head.map(h => `<th>${h}</th>`).join('') + '</tr>';
+  document.getElementById('inv-body').innerHTML = data.rows.map(r => {
+    const color = r[r.length-1];
+    const cells = r.slice(0, -1);
+    return '<tr class="row-fade">' + cells.map((c,i) =>
+      `<td class="${i===0?'strong mono':''}" style="${i===cells.length-1 ? `color:var(--${color==='dim'?'text-faint':color}); font-weight:700;` : ''}">${c}</td>`
+    ).join('') + '</tr>';
+  }).join('');
+}
+
+function renderReportCards(){
+  const el = document.getElementById('report-cards');
+  el.innerHTML = reportTypes.map((r,i) => `
+    <div class="glass report-card ${i===0?'selected':''}" data-idx="${i}" onclick="selectReport(${i}, this)">
+      <div class="report-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></svg></div>
+      <h4>${r.title}</h4>
+      <p>${r.desc}</p>
+    </div>`).join('');
+}
+
+function renderHistory(){
+  const el = document.getElementById('report-history');
+  el.innerHTML = reportHistory.map(r => `
+    <tr class="row-fade">
+      <td class="strong">${r[0]}</td>
+      <td>${r[1]}</td>
+      <td>${r[2]}</td>
+      <td>${badge(r[3])}</td>
+      <td>${r[3]==='ready' ? '<span class="link-btn">Download</span>' : ''}</td>
+    </tr>`).join('');
+}
+
+/* ---------------- Interactions ---------------- */
+function login(){
+  document.getElementById('view-login').classList.add('hidden');
+  const app = document.getElementById('view-app');
+  app.classList.remove('hidden');
+  app.classList.add('fade-in');
+}
+function logout(){
+  document.getElementById('view-app').classList.add('hidden');
+  document.getElementById('view-login').classList.remove('hidden');
+}
+
+const titles = {
+  dashboard: ["Overview","Dashboard"],
+  security: ["Threat Detection","Security Findings"],
+  cost: ["FinOps","Cost Optimization"],
+  inventory: ["Cloud Assets","Resource Inventory"],
+  reports: ["Exports","Reports"],
+};
+
+function go(view){
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === view));
+  document.querySelectorAll('#root .content > section').forEach(s => s.classList.add('hidden'));
+  const sec = document.getElementById('sec-' + view);
+  sec.classList.remove('hidden');
+  sec.classList.add('fade-in');
+  document.getElementById('topbar-eyebrow').textContent = titles[view][0];
+  document.getElementById('topbar-title').textContent = titles[view][1];
+}
+
+function filterFindings(sev, el){
+  document.querySelectorAll('[data-sev]').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderFindings(sev);
+}
+
+function runScan(){
+  const btn = event.currentTarget;
+  const original = btn.textContent;
+  btn.textContent = 'Scanning...';
+  btn.style.opacity = '0.7';
+  setTimeout(() => { btn.textContent = original; btn.style.opacity = '1'; renderFindings('all'); document.querySelectorAll('[data-sev]').forEach(c=>c.classList.toggle('active', c.dataset.sev==='all')); }, 1100);
+}
+
+let savedTotal = 1120;
+function applyRec(i){
+  const btn = document.getElementById('apply-' + i);
+  if(btn.classList.contains('applied')) return;
+  btn.classList.add('applied');
+  btn.textContent = 'Applied ✓';
+  const val = parseInt(recs[i][4].replace(/\D/g,''));
+  savedTotal -= val;
+}
+
+function switchTab(key, el){
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === el));
+  renderInventory(key);
+}
+
+function syncAws(){
+  const btn = event.currentTarget;
+  const original = btn.textContent;
+  btn.textContent = 'Syncing...';
+  setTimeout(() => { btn.textContent = original; }, 1000);
+}
+
+let selectedReport = 0;
+function selectReport(i, el){
+  document.querySelectorAll('.report-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedReport = i;
+}
+
+function generateReport(){
+  const name = "Generating: " + reportTypes[selectedReport].title;
+  reportHistory.unshift([name, reportTypes[selectedReport].title.split(' ')[0], "Jul 29, 2026", "processing"]);
+  renderHistory();
+  setTimeout(() => {
+    reportHistory[0][0] = reportTypes[selectedReport].title + " — Jul 29";
+    reportHistory[0][3] = "ready";
+    renderHistory();
+  }, 1800);
+}
+
+/* ---------------- Init ---------------- */
+renderAlerts();
+renderBars('cost-bars');
+renderBars('cost-bars-2');
+renderFindings('all');
+renderRecs();
+renderInventory('ec2');
+renderReportCards();
+renderHistory();
+</script>
+</body>
+</html>

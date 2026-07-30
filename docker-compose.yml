@@ -1,0 +1,6 @@
+services:
+  frontend:
+    build: ./frontend
+    container_name: cloudshield-frontend
+    ports:
+      - "3000:80"

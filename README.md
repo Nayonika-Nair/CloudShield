@@ -96,13 +96,53 @@ The project will be considered successful if it:
 
 ## Future Scope
 
-* Live AWS integration using Boto3 APIs.
-* Multi-cloud support (Azure and Google Cloud Platform).
-* AI-powered anomaly detection and predictive cloud analytics.
-* Automated security remediation and policy enforcement.
-* Email and Slack notifications for critical alerts.
-* Role-Based Access Control (RBAC).
-* Infrastructure-as-Code integration (Terraform and CloudFormation).
-* CI/CD pipeline integration.
-* Historical analytics and trend forecasting.
-* Mobile-friendly dashboard and Progressive Web App (PWA) support.
+- Live AWS integration using Boto3 APIs.
+- Multi-cloud support (Microsoft Azure and Google Cloud Platform).
+- AI-powered anomaly detection and predictive cloud analytics.
+- Automated security remediation and policy enforcement.
+- Email and Slack notifications for critical alerts.
+- Role-Based Access Control (RBAC).
+- Infrastructure-as-Code integration (Terraform and CloudFormation).
+- CI/CD pipeline integration.
+- Historical analytics and trend forecasting.
+- Mobile-friendly dashboard and Progressive Web App (PWA) support.
+- Kubernetes security monitoring.
+- Compliance auditing based on CIS Benchmarks, NIST, and ISO 27001.
+- Predictive cloud cost forecasting using Machine Learning.
+- Slack and Microsoft Teams integration.
+- Real-time monitoring and automated remediation.
+
+---
+
+## Git Workflow
+
+This project follows the **GitHub Flow** workflow.
+
+### Branches
+
+- `main` – Stable production-ready code
+- `feature/*` – New feature development
+
+### Development Process
+
+1. Create a feature branch from `main`.
+2. Develop and commit changes.
+3. Push the feature branch.
+4. Open a Pull Request.
+5. Review and merge into `main`.
+
+---
+
+## Documentation
+
+Project documentation is available inside the **docs/** folder.
+
+- Wireframes
+- Architecture Diagrams
+- Docker Installation Screenshots
+- Application Screenshots
+- Vision Document
+- Sprint Planning
+- User Stories
+- Technical Development Workflow
+- Running Instructions
