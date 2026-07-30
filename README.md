@@ -210,3 +210,20 @@ Generate reports containing:
 - Predictive cloud cost forecasting using machine learning.
 - Slack and Microsoft Teams integration.
 - Real-time monitoring and automated remediation.
+
+## Git Workflow
+
+This project follows the GitHub Flow workflow.
+
+### Branches
+
+- `main` – Stable production-ready code
+- `feature/*` – New feature development
+
+### Development Process
+
+1. Create a feature branch from `main`.
+2. Develop and commit changes.
+3. Push the feature branch.
+4. Open a Pull Request.
+5. Review and merge into `main`.
