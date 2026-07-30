@@ -139,6 +139,19 @@ Project documentation is available inside the **docs/** folder.
 
 - Wireframes
 - Architecture Diagrams
+
+- # 📁 Project Documentation
+
+| Documentation | Location |
+|---------------|----------|
+| 📄 Reports | `docs/reports/` |
+| 🏗️ Architecture Diagram | `docs/diagrams/` |
+| 🖼️ Wireframes | `docs/wireframes/` |
+| 📸 Application Screenshots | `docs/screenshots/app_running/` |
+| 🐳 Docker Installation | `docs/screenshots/docker_install/` |
+| ⚙️ Docker Build | `docs/screenshots/docker_build/` |
+
+> **Note:** All screenshots, diagrams, and supporting documentation required for the project submission are available in the **`docs/`** directory.
 - Docker Installation Screenshots
 - Application Screenshots
 - Vision Document
