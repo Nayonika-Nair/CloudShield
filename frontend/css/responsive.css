@@ -1,0 +1,10 @@
+/* ============================================================
+   CloudShield Responsive Adjustments
+   ============================================================ */
+
+@media (max-width: 980px) {
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .grid-2 { grid-template-columns: 1fr; }
+  .report-cards { grid-template-columns: 1fr; }
+  .rec-row { grid-template-columns: 1fr; }
+}
