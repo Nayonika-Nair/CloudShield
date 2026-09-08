@@ -1,0 +1,26 @@
+/* ============================================================
+   CloudShield Design Tokens
+   ============================================================ */
+
+:root {
+  --bg: #060814;
+  --bg-2: #0a0e22;
+  --panel: rgba(16, 22, 45, 0.62);
+  --panel-solid: #0d1230;
+  --border: rgba(120, 150, 255, 0.14);
+  --border-strong: rgba(120, 180, 255, 0.32);
+  --cyan: #22d3ee;
+  --cyan-soft: rgba(34, 211, 238, 0.15);
+  --violet: #8b6ff8;
+  --violet-soft: rgba(139, 111, 248, 0.16);
+  --green: #34d399;
+  --amber: #fbbf24;
+  --red: #f87171;
+  --text: #e8ecff;
+  --text-dim: #8c93b8;
+  --text-faint: #5b6288;
+  --radius: 16px;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}

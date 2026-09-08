@@ -1,0 +1,23 @@
+{
+  "name": "cloudshield",
+  "version": "1.0.0",
+  "description": "CloudShield is a cloud management platform designed to help organizations monitor, secure, and optimize their AWS cloud infrastructure from a single dashboard. The platform provides real-time visibility into cloud resources, identifies potential security risks, highlights unnecessary cloud expenses, and generates actionable recommendations to improve both security and cost efficiency. By combining cloud security monitoring with financial optimization, CloudShield simplifies cloud management for administrators and reduces the operational complexity of maintaining AWS environments.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nayonika-Nair/CloudShield.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nayonika-Nair/CloudShield/issues"
+  },
+  "homepage": "https://github.com/Nayonika-Nair/CloudShield#readme"
+}
