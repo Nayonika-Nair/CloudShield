@@ -114,6 +114,12 @@ The project will be considered successful if it:
 
 ---
 
+## Software Design
+CloudShield uses a consistent, modular UI that directly translates the requirements into six focused screens, with reusable components, clear navigation, and color-coded status indicators for quick understanding. The design follows progressive disclosure, showing summaries first and detailed security, cost, inventory, and reporting information only when needed.
+https://www.figma.com/design/6oVfmp0ktnxEAI0QBptFRF/CloudShield---Wireframes?node-id=0-1&p=f&t=CEc4UhZ7usdmmt5E-0
+
+---
+
 ## Git Workflow
 
 This project follows the **GitHub Flow** workflow.
