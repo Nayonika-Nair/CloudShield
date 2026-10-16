@@ -152,3 +152,23 @@ def get_current_user(
         raise credentials_exception
 
     return user
+
+# ------------------------------------------------------------
+# Role-based access control
+# ------------------------------------------------------------
+
+ROLES = ("viewer", "analyst", "admin")
+
+
+def require_role(*allowed: str):
+    """Dependency factory: the current user must hold one of the given roles."""
+
+    def checker(user: User = Depends(get_current_user)) -> User:
+        if user.role not in allowed:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"This operation requires one of the roles: {', '.join(allowed)}.",
+            )
+        return user
+
+    return checker

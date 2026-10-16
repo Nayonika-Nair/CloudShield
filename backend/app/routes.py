@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.auth import (
     create_access_token,
+    get_current_user,
     hash_password,
     verify_password,
 )
@@ -54,6 +55,7 @@ def register(
     user = User(
         email=payload.email,
         password_hash=hash_password(payload.password),
+        role="viewer",
     )
 
     db.add(user)
@@ -104,6 +106,23 @@ def login(
     )
 
     return Token(access_token=access_token)
+
+
+# ------------------------------------------------------------
+# Auth: current user
+# ------------------------------------------------------------
+
+@router.get(
+    "/auth/me",
+    response_model=UserResponse,
+)
+def me(current_user: User = Depends(get_current_user)):
+    """
+    Return the authenticated user, including the role that controls
+    access to simulator write operations.
+    """
+
+    return current_user
 
 
 # ------------------------------------------------------------

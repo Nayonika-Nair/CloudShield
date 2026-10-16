@@ -1,6 +1,64 @@
+# CloudShield: frontend (nginx) + API (FastAPI) + PostgreSQL.
+# Start with:  docker compose up --build
+# Configuration comes from environment variables (copy .env.example to .env first).
+
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: cloudshield-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cloudshield}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-cloudshield}
+    volumes:
+      - cloudshield-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: cloudshield-backend
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-cloudshield}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-cloudshield}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?set JWT_SECRET_KEY in .env}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ANALYST_EMAIL: ${ANALYST_EMAIL:-}
+      ANALYST_PASSWORD: ${ANALYST_PASSWORD:-}
+      VIEWER_EMAIL: ${VIEWER_EMAIL:-}
+      VIEWER_PASSWORD: ${VIEWER_PASSWORD:-}
+      SEED_DEMO_ENVIRONMENT: ${SEED_DEMO_ENVIRONMENT:-true}
+      SIM_AUTO_ADVANCE_SECONDS: ${SIM_AUTO_ADVANCE_SECONDS:-0}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      SERVE_FRONTEND: "false"
+      DEMO_MODE: "true"
+      AWS_ENABLED: "false"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    restart: unless-stopped
+
   frontend:
     build: ./frontend
     container_name: cloudshield-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
     ports:
       - "3000:80"
+    restart: unless-stopped
+
+volumes:
+  cloudshield-pgdata:

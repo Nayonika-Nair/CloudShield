@@ -49,3 +49,14 @@ coverage/
 
 # Misc
 .idea/
+# Local tooling
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+*.db
+.tmp/
+.cosmic-ray/
+
+# keep the committed template
+!.env.example
