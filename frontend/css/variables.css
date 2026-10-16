@@ -1,26 +1,53 @@
 /* ============================================================
-   CloudShield Design Tokens
+   CloudShield Design Tokens (light, formal theme)
    ============================================================ */
 
 :root {
-  --bg: #060814;
-  --bg-2: #0a0e22;
-  --panel: rgba(16, 22, 45, 0.62);
-  --panel-solid: #0d1230;
-  --border: rgba(120, 150, 255, 0.14);
-  --border-strong: rgba(120, 180, 255, 0.32);
-  --cyan: #22d3ee;
-  --cyan-soft: rgba(34, 211, 238, 0.15);
-  --violet: #8b6ff8;
-  --violet-soft: rgba(139, 111, 248, 0.16);
-  --green: #34d399;
-  --amber: #fbbf24;
-  --red: #f87171;
-  --text: #e8ecff;
-  --text-dim: #8c93b8;
-  --text-faint: #5b6288;
-  --radius: 16px;
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'Inter', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #eef2f7;
+  --border: #d8dfe9;
+  --border-strong: #b4c0d0;
+
+  --text: #1a2838;
+  --text-dim: #3f5166;
+  --text-faint: #5a6b7e;
+
+  --primary: #1f4e8c;
+  --primary-hover: #173d6e;
+  --primary-soft: #e5edf8;
+  --focus: #0b63ce;
+
+  --critical: #9f1218;
+  --critical-bg: #fdeaea;
+  --high: #b43e0a;
+  --high-bg: #fff0e3;
+  --medium: #7d5700;
+  --medium-bg: #fff5d6;
+  --low: #2c6b3d;
+  --low-bg: #e6f4ea;
+  --ok: #2c6b3d;
+  --ok-bg: #e6f4ea;
+  --info: #1f4e8c;
+  --info-bg: #e5edf8;
+
+  /* Chart categories: distinguishable, readable on white */
+  --c1: #1f4e8c;
+  --c2: #2a9d8f;
+  --c3: #e09f3e;
+  --c4: #8e6bbf;
+  --c5: #c2543d;
+  --c6: #6b7c90;
+  --c7: #3b8ea5;
+  --c8: #7aa84a;
+
+  --radius: 8px;
+  --radius-sm: 5px;
+  --shadow: 0 1px 2px rgba(20, 40, 70, 0.06), 0 1px 3px rgba(20, 40, 70, 0.04);
+  --shadow-lg: 0 10px 30px rgba(20, 40, 70, 0.16);
+
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'JetBrains Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
 }

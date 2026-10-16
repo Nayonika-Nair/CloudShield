@@ -104,6 +104,8 @@ def regenerate(db: Session, actor: str | None) -> dict[str, Any]:
 
 def update_config(db: Session, actor: str | None, patch: dict[str, Any]) -> dict[str, Any]:
     allowed = {"pricing", "thresholds"}
+    if not patch:
+        raise SimError("Provide pricing and/or thresholds to change", "invalid_configuration", 422)
     bad = set(patch) - allowed
     if bad:
         raise SimError(f"Only {sorted(allowed)} can be changed on a live environment; regenerate to change {sorted(bad)}",
@@ -113,7 +115,11 @@ def update_config(db: Session, actor: str | None, patch: dict[str, Any]) -> dict
     for section, values in patch.items():
         if not isinstance(values, dict):
             raise SimError(f"'{section}' must be an object", "invalid_configuration", 422)
-        merged[section].update(values)
+        for key, val in values.items():
+            if isinstance(val, dict) and isinstance(merged[section].get(key), dict):
+                merged[section][key].update(val)      # e.g. change a few instance prices, keep the rest
+            else:
+                merged[section][key] = val
     try:
         SimConfig.model_validate(merged)
     except ValidationError as exc:

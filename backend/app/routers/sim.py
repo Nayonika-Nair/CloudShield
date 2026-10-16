@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, Query, Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -39,6 +39,8 @@ class GenerateRequest(BaseModel):
 
 
 class ConfigPatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     pricing: dict[str, Any] | None = None
     thresholds: dict[str, Any] | None = None
 

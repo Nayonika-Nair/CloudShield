@@ -245,9 +245,10 @@ def topology(env: Environment) -> dict[str, Any]:
         if route["status"] == "igw":
             edges.append({"source": route["igw"], "target": sn["id"], "kind": "route"})
     for sg in env.of("security_group"):
-        open_rules = [describe_rule(r) for r in sg["ingress"] if is_world(r.get("cidr"))]
+        world = [r for r in sg["ingress"] if is_world(r.get("cidr"))]
+        risky = [r for r in world if sensitive_ports_in(r) or rule_is_all_ports(r)]
         nodes.append({"id": sg["id"], "type": "security_group", "label": sg["name"], "parent": sg["vpc_id"],
-                      "attrs": {"open_to_world": open_rules}, "exposed": bool(open_rules)})
+                      "attrs": {"open_to_world": [describe_rule(r) for r in world]}, "exposed": bool(risky)})
     for inst in env.of("ec2_instance"):
         if inst["state"] == "terminated":
             continue
