@@ -27,7 +27,8 @@ def fixed_daily(env: Environment, res: dict[str, Any], *, state: str | None = No
     elif t == "ebs_volume":
         return {"EBS": res["size_gb"] * float(p["ebs_gb_month"][res["volume_type"]]) / MONTH_DAYS}
     elif t == "snapshot":
-        return {"Snapshots": res["size_gb"] * float(p["snapshot_gb_month"]) / MONTH_DAYS}
+        fraction = float(p["managed_snapshot_billed_fraction"]) if res.get("managed_by") == "backup_policy" else 1.0
+        return {"Snapshots": res["size_gb"] * float(p["snapshot_gb_month"]) * fraction / MONTH_DAYS}
     elif t == "s3_bucket":
         gb = res["size_gb"] if size_gb is None else size_gb
         return {"S3": gb * float(p["s3_gb_month"]) / MONTH_DAYS}

@@ -143,6 +143,8 @@ class Pricing(_Strict):
     s3_gb_month: float = Field(DEFAULT_PRICING["s3_gb_month"], ge=0)
     rds_storage_gb_month: float = Field(DEFAULT_PRICING["rds_storage_gb_month"], ge=0)
     snapshot_gb_month: float = Field(DEFAULT_PRICING["snapshot_gb_month"], ge=0)
+    # Policy-managed snapshots are incremental: only changed blocks are billed.
+    managed_snapshot_billed_fraction: float = Field(DEFAULT_PRICING["managed_snapshot_billed_fraction"], ge=0, le=1)
     eip_idle_hourly: float = Field(DEFAULT_PRICING["eip_idle_hourly"], ge=0)
     data_transfer_out_gb: float = Field(DEFAULT_PRICING["data_transfer_out_gb"], ge=0)
     alb_hourly: float = Field(DEFAULT_PRICING["alb_hourly"], ge=0)

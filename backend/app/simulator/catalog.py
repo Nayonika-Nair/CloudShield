@@ -57,6 +57,7 @@ DEFAULT_PRICING: dict = {
     "s3_gb_month": 0.023,
     "rds_storage_gb_month": 0.115,
     "snapshot_gb_month": 0.05,
+    "managed_snapshot_billed_fraction": 0.05,
     "eip_idle_hourly": 0.005,
     "data_transfer_out_gb": 0.09,
     "alb_hourly": 0.0225,

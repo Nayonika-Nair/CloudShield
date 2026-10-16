@@ -98,7 +98,8 @@ def compute_day(env: Environment, day: date, *, historical: bool, egress: dict[s
         charge(vol["id"], billing.fixed_daily(env, vol))
 
     for snap in env.of("snapshot"):
-        if _exists_on(snap, day):
+        # Policy snapshots rotate continuously, so history assumes the steady-state set existed on every day.
+        if snap.get("managed_by") == "backup_policy" or _exists_on(snap, day):
             charge(snap["id"], billing.fixed_daily(env, snap))
 
     for bucket in env.of("s3_bucket"):

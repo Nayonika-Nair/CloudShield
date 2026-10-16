@@ -299,13 +299,15 @@ class _Gen:
                            az=self.rng.choice(self.azs), tags=self.tags(envtag),
                            created_at=self.ago(self.rng.randint(max(60, self.min_age), 400)))
 
-        # snapshots: one recent policy snapshot per protected volume, plus old manual ones
+        # snapshots: the full retention window of policy snapshots, plus old manual ones
         attached = [v for v in env.of("ebs_volume") if v["attached_to"]]
         for vol in attached:
             if vol["backup_policy"] == "daily":
-                b.build_snapshot(env, vol, managed_by="backup_policy", created_at=self.ago(self.rng.random() * 0.9))
+                for k in range(14):
+                    b.build_snapshot(env, vol, managed_by="backup_policy", created_at=self.ago(k + self.rng.random() * 0.9))
             elif vol["backup_policy"] == "weekly":
-                b.build_snapshot(env, vol, managed_by="backup_policy", created_at=self.ago(self.rng.random() * 6))
+                for k in range(5):
+                    b.build_snapshot(env, vol, managed_by="backup_policy", created_at=self.ago(k * 7 + self.rng.random() * 3))
         protected = [v for v in attached if v["backup_policy"] != "none"] or attached
         for k in range(cfg.counts.snapshots):
             if not protected:

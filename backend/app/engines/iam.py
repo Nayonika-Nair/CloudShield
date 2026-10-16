@@ -72,17 +72,20 @@ def principals(env: Environment) -> list[dict[str, Any]]:
 
 
 def trust_match(env: Environment, role: dict[str, Any], principal: dict[str, Any]) -> tuple[bool, bool]:
-    """(trusted, needs_identity_permission) for ``principal`` assuming ``role``."""
+    """(trusted, needs_identity_permission) for ``principal`` assuming ``role``.
+
+    An explicit principal or wildcard in the trust policy suffices on its own; a
+    trust on the account root additionally requires an identity-based allow.
+    """
+    via_root = False
     for t in role["trust"]:
         if t["type"] != "AWS":
             continue
-        if t["value"] == "*":
-            return True, False
-        if t["value"] == principal["id"] or t["value"] == arn(env, principal):
+        if t["value"] == "*" or t["value"] == principal["id"] or t["value"] == arn(env, principal):
             return True, False
         if t["value"] == env.account_id:
-            return True, True
-    return False, False
+            via_root = True
+    return (True, True) if via_root else (False, False)
 
 
 def can_assume(env: Environment, principal: dict[str, Any], role: dict[str, Any]) -> bool:
