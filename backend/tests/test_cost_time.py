@@ -232,7 +232,8 @@ def test_idle_instance_recommendation_uses_metrics_and_full_compute_saving(env):
     inst = next(i for i in env.of("ec2_instance") if i["profile"] == "idle" and i["state"] == "running")
     (rec,) = rec_by(env, "OPT-001", resource_id=inst["id"])
     compute = billing.ec2_hourly(env, inst["instance_type"]) * 24 * 30
-    assert rec["estimated_monthly_savings"] == pytest.approx(compute, abs=0.01)
+    transfer = billing.data_transfer_daily(env, cost.expected_net_out_gb(env, inst)) * 30
+    assert rec["estimated_monthly_savings"] == pytest.approx(compute + transfer, abs=0.01)
     assert rec["evidence"]["cpu_avg_pct"] < env.thresholds["idle_cpu_avg_pct"]
     assert rec["assumptions"] and rec["risk"] and rec["recommended_action"]
     assert rec["remediation"]["operations"][0]["action"] == "ec2.stop"

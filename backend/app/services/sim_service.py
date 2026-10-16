@@ -445,7 +445,7 @@ def dashboard(db: Session) -> dict[str, Any]:
                             "verified_monthly_savings": round(float(verified or 0), 2)},
         "compliance": latest.compliance if latest else [],
         "top_findings": [finding_dict(f) for f in top],
-        "exposed_resources": len({e["resource_id"] for e in network.reachable_exposures(env)}),
+        "exposed_resources": len(network.risky_exposure_ids(env)),
         "admin_principals": len(iam.analyze(env)["admin_principals"]),
     }
 

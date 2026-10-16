@@ -26,7 +26,10 @@ import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
 from app.database import Base, SessionLocal, engine  # noqa: E402
+from app import auth as _auth  # noqa: E402
 from app.main import app, seed_users  # noqa: E402
+
+_auth.pwd_context.update(bcrypt__default_rounds=4)  # keep the suite fast; production uses the library default
 from app.simulator.config import SimConfig, preset_config  # noqa: E402
 from app.simulator.generator import generate_environment  # noqa: E402
 
@@ -93,10 +96,3 @@ def sim(client, admin):
     r = client.post("/api/sim/environments", headers=admin, json={"preset": "typical"})
     assert r.status_code == 201, r.text
     return client, admin
-
-
-def first(items, **match):
-    for it in items:
-        if all(it.get(k) == v for k, v in match.items()):
-            return it
-    raise AssertionError(f"no item matching {match}")

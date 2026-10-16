@@ -27,5 +27,6 @@ def analyze(env: Environment) -> dict[str, Any]:
         "potential_savings": optimization.total_savings([r for r in recs if r["remediation"]["supported"]]),
         "compliance": compliance.checks(env),
         "anomalies": anomalies,
-        "exposed_resources": sorted({e["resource_id"] for e in ctx["exposures"] if e["reachable"]}),
+        "exposed_resources": sorted({e["resource_id"] for e in ctx["exposures"]
+                                     if e["reachable"] and (e["sensitive_ports"] or e["all_ports"])}),
     }

@@ -13,8 +13,10 @@ from app.simulator.env import Environment, parse_iso
 MIN_POINTS = 5
 
 
-def stats(env: Environment, rid: str, metric: str, window: int) -> dict[str, float] | None:
-    pts = [v for _, v in env.metric_series(rid, metric, window)]
+def stats(env: Environment, rid: str, metric: str, window: int, since: str | None = None) -> dict[str, float] | None:
+    """Window statistics; points before ``since`` (a resize) are ignored because they describe the old size."""
+    cutoff = since[:10] if since else None
+    pts = [v for d, v in env.metric_series(rid, metric, window) if cutoff is None or d >= cutoff]
     if len(pts) < MIN_POINTS:
         return None
     return {"avg": round(sum(pts) / len(pts), 2), "max": round(max(pts), 2), "min": round(min(pts), 2), "days": len(pts)}
@@ -61,11 +63,13 @@ def recommend(env: Environment, anomalies: list[dict[str, Any]] | None = None) -
     for inst in env.of("ec2_instance"):
         if inst["state"] != "running":
             continue
-        cpu, net = stats(env, inst["id"], "cpu", window), stats(env, inst["id"], "net_out_gb", window)
+        since = inst.get("config_changed_at")
+        cpu, net = stats(env, inst["id"], "cpu", window, since), stats(env, inst["id"], "net_out_gb", window, since)
         if cpu is None:
             continue
-        mem = stats(env, inst["id"], "mem", window)
+        mem = stats(env, inst["id"], "mem", window, since)
         compute = billing.ec2_hourly(env, inst["instance_type"]) * 24 * MONTH_DAYS
+        running_cost = sum(cost.resource_daily_run_rate(env, inst).values()) * MONTH_DAYS  # compute + data transfer
         evidence = {"cpu_avg_pct": cpu["avg"], "cpu_max_pct": cpu["max"], "net_out_avg_gb": net["avg"] if net else None,
                     "days_observed": cpu["days"], "instance_type": inst["instance_type"]}
         if cpu["avg"] < th["idle_cpu_avg_pct"] and cpu["max"] < th["idle_cpu_max_pct"] and (net is None or net["avg"] < 2.0):
@@ -73,8 +77,8 @@ def recommend(env: Environment, anomalies: list[dict[str, Any]] | None = None) -
                 "OPT-001", "Idle instance", inst, title=f"Stop idle instance {inst['name']}",
                 reason=f"CPU averaged {cpu['avg']}% (max {cpu['max']}%) over {cpu['days']} days, below the idle thresholds "
                        f"({th['idle_cpu_avg_pct']}% avg / {th['idle_cpu_max_pct']}% max).",
-                evidence=evidence, current=rate.get(inst["id"], compute), savings=compute,
-                assumptions=["Savings equal the instance's compute charge (24h x simulated hourly price x 30 days).",
+                evidence=evidence, current=rate.get(inst["id"], compute), savings=running_cost,
+                assumptions=["Savings equal the instance's compute charge (24h x simulated hourly price x 30 days) plus its data-transfer charge.",
                              "Attached EBS volumes keep being billed while the instance is stopped."],
                 risk="The workload becomes unavailable until restarted; restart takes seconds in the simulator.",
                 action="Stop the instance (or terminate it if it is confirmed unused).",
@@ -170,7 +174,8 @@ def recommend(env: Environment, anomalies: list[dict[str, Any]] | None = None) -
     for db in env.of("rds_instance"):
         if db["state"] != "available":
             continue
-        cpu, mem = stats(env, db["id"], "cpu", window), stats(env, db["id"], "mem", window)
+        since = db.get("config_changed_at")
+        cpu, mem = stats(env, db["id"], "cpu", window, since), stats(env, db["id"], "mem", window, since)
         if cpu is None or not (cpu["avg"] < 15 and cpu["max"] < 40):
             continue
         vold, memold, _ = RDS_CLASSES[db["instance_class"]]

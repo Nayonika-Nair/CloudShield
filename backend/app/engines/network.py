@@ -161,6 +161,11 @@ def exposures(env: Environment, resource_id: str | None = None) -> list[dict[str
     return result
 
 
+def risky_exposure_ids(env: Environment) -> list[str]:
+    """Resources reachable from the internet on a sensitive port or on all ports."""
+    return sorted({e["resource_id"] for e in exposures(env) if e["reachable"] and (e["sensitive_ports"] or e["all_ports"])})
+
+
 def reachable_exposures(env: Environment, port: int | None = None) -> list[dict[str, Any]]:
     out = [e for e in exposures(env) if e["reachable"]]
     if port is not None:
@@ -215,12 +220,14 @@ def topology_issues(env: Environment) -> list[dict[str, Any]]:
 
 
 def topology(env: Environment) -> dict[str, Any]:
-    exposed: dict[str, list[int]] = {}
+    exposed: dict[str, list[int]] = {}   # reachable on a sensitive port or all ports
+    facing: set[str] = set()             # reachable from the internet on any port (e.g. HTTPS)
     for e in exposures(env):
         if e["reachable"]:
-            exposed.setdefault(e["resource_id"], [])
-            ports = e["sensitive_ports"] or ([e["from_port"]] if e["from_port"] == e["to_port"] else [])
-            exposed[e["resource_id"]] += ports
+            facing.add(e["resource_id"])
+            if e["sensitive_ports"] or e["all_ports"]:
+                exposed.setdefault(e["resource_id"], [])
+                exposed[e["resource_id"]] += e["sensitive_ports"] or [0]
     nodes: list[dict[str, Any]] = [{"id": "internet", "type": "internet", "label": "Internet", "parent": None}]
     edges: list[dict[str, Any]] = []
     for vpc in env.of("vpc"):
@@ -245,7 +252,7 @@ def topology(env: Environment) -> dict[str, Any]:
         if inst["state"] == "terminated":
             continue
         nodes.append({"id": inst["id"], "type": "ec2_instance", "label": inst["name"], "parent": inst["subnet_id"],
-                      "state": inst["state"], "exposed": inst["id"] in exposed,
+                      "state": inst["state"], "exposed": inst["id"] in exposed, "internet_facing": inst["id"] in facing,
                       "exposed_ports": sorted(set(exposed.get(inst["id"], []))),
                       "attrs": {"instance_type": inst["instance_type"], "private_ip": inst["private_ip"],
                                 "public_ip": inst.get("public_ip")}})
@@ -262,7 +269,8 @@ def topology(env: Environment) -> dict[str, Any]:
         eni = env.resources["network_interface"].get(db.get("eni_id") or "")
         nodes.append({"id": db["id"], "type": "rds_instance", "label": db["name"],
                       "parent": eni["subnet_id"] if eni else None, "state": db["state"],
-                      "exposed": db["id"] in exposed, "exposed_ports": sorted(set(exposed.get(db["id"], []))),
+                      "exposed": db["id"] in exposed, "internet_facing": db["id"] in facing,
+                      "exposed_ports": sorted(set(exposed.get(db["id"], []))),
                       "attrs": {"engine": db["engine"], "instance_class": db["instance_class"],
                                 "public": db["publicly_accessible"]}})
         for sg in db["sg_ids"]:
@@ -270,7 +278,8 @@ def topology(env: Environment) -> dict[str, Any]:
     for lb in env.of("load_balancer"):
         nodes.append({"id": lb["id"], "type": "load_balancer", "label": lb["name"],
                       "parent": lb["subnet_ids"][0] if lb["subnet_ids"] else lb["vpc_id"], "state": lb["state"],
-                      "exposed": lb["id"] in exposed, "exposed_ports": sorted(set(exposed.get(lb["id"], []))),
+                      "exposed": lb["id"] in exposed, "internet_facing": lb["id"] in facing,
+                      "exposed_ports": sorted(set(exposed.get(lb["id"], []))),
                       "attrs": {"targets": len(lb["targets"]), "scheme": lb["scheme"]}})
         for t in lb["targets"]:
             if env.exists(t):
@@ -291,7 +300,7 @@ def topology(env: Environment) -> dict[str, Any]:
     return {
         "nodes": nodes, "edges": edges,
         "summary": {"vpcs": len(env.of("vpc")), "subnets": len(env.of("subnet")),
-                    "exposed_resources": len(exposed),
+                    "exposed_resources": len(exposed), "internet_facing": len(facing),
                     "public_subnets": sum(1 for s in env.of("subnet") if subnet_is_public(env, s))},
     }
 

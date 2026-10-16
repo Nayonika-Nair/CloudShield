@@ -232,6 +232,7 @@ def ec2_change_type(env, tid, p):
         raise SimError(f"Instance is already of type {p['instance_type']}", "no_change")
     old = inst["instance_type"]
     inst["instance_type"] = p["instance_type"]
+    inst["config_changed_at"] = iso(env.sim_time)  # metrics before this moment describe the old size
     return {"message": f"Changed {tid} from {old} to {p['instance_type']}"}
 
 
@@ -718,6 +719,7 @@ def rds_modify(env, tid, p):
     changed = []
     if "instance_class" in p and p["instance_class"] != db["instance_class"]:
         db["instance_class"] = p["instance_class"]
+        db["config_changed_at"] = iso(env.sim_time)
         changed.append(f"class={p['instance_class']}")
     if "multi_az" in p and p["multi_az"] != db["multi_az"]:
         db["multi_az"] = p["multi_az"]

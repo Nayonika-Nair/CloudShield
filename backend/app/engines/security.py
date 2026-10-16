@@ -132,7 +132,7 @@ def rule_exposure(env: Environment, ctx: dict[str, Any]) -> list[dict[str, Any]]
                     recommendation="Remove or restrict the rule so it cannot become exploitable.", plan=plan))
             continue
         label = ", ".join(SENSITIVE_PORTS.get(p, str(p)) for p in e["sensitive_ports"])
-        base = {"rule": network.describe_rule(rule)}
+        base = {"rule_summary": network.describe_rule(rule)}
         if e["all_ports"]:
             sev, why = _sev(env, res, "CRITICAL", prod_bump=False)
             out.append(_finding(
