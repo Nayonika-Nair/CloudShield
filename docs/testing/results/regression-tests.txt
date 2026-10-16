@@ -1,0 +1,44 @@
+$ python -m pytest tests/test_regression_legacy.py -v -p no:cacheprovider
+(cwd: backend)
+
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\bhuva\Downloads\abhinav_github\CloudShield-src\CloudShield\.venv\Scripts\python.exe
+rootdir: C:\Users\bhuva\Downloads\abhinav_github\CloudShield-src\CloudShield\backend
+plugins: anyio-4.15.1, platformdirs-4.13.3, cov-6.0.0
+collecting ... collected 25 items
+
+tests/test_regression_legacy.py::test_register_login_and_me_flow PASSED  [  4%]
+tests/test_regression_legacy.py::test_login_rejects_bad_credentials_with_same_message[payload0] PASSED [  8%]
+tests/test_regression_legacy.py::test_login_rejects_bad_credentials_with_same_message[payload1] PASSED [ 12%]
+tests/test_regression_legacy.py::test_register_validation[payload0] PASSED [ 16%]
+tests/test_regression_legacy.py::test_register_validation[payload1] PASSED [ 20%]
+tests/test_regression_legacy.py::test_register_validation[payload2] PASSED [ 24%]
+tests/test_regression_legacy.py::test_passwords_are_stored_hashed PASSED [ 28%]
+tests/test_regression_legacy.py::test_mock_provider_inventory_is_unchanged PASSED [ 32%]
+tests/test_regression_legacy.py::test_provider_factory_defaults_to_mock_and_refuses_real_aws PASSED [ 36%]
+tests/test_regression_legacy.py::test_complete_scan_baseline_values PASSED [ 40%]
+tests/test_regression_legacy.py::test_security_engine_rules_still_behave PASSED [ 44%]
+tests/test_regression_legacy.py::test_cost_engine_rules_still_behave PASSED [ 48%]
+tests/test_regression_legacy.py::test_recommendation_engine_sorts_deduplicates_and_summarises PASSED [ 52%]
+tests/test_regression_legacy.py::test_original_api_routes_keep_their_contract[/api/provider-keys0] PASSED [ 56%]
+tests/test_regression_legacy.py::test_original_api_routes_keep_their_contract[/api/inventory-keys1] PASSED [ 60%]
+tests/test_regression_legacy.py::test_original_api_routes_keep_their_contract[/api/security-keys2] PASSED [ 64%]
+tests/test_regression_legacy.py::test_original_api_routes_keep_their_contract[/api/costs-keys3] PASSED [ 68%]
+tests/test_regression_legacy.py::test_original_api_routes_keep_their_contract[/api/recommendations-keys4] PASSED [ 72%]
+tests/test_regression_legacy.py::test_original_api_routes_keep_their_contract[/api/dashboard-keys5] PASSED [ 76%]
+tests/test_regression_legacy.py::test_dashboard_values_match_scan_baseline PASSED [ 80%]
+tests/test_regression_legacy.py::test_legacy_scan_persists_snapshot_and_history PASSED [ 84%]
+tests/test_regression_legacy.py::test_legacy_scan_does_not_touch_simulator_history PASSED [ 88%]
+tests/test_regression_legacy.py::test_save_scan_results_is_transactional PASSED [ 92%]
+tests/test_regression_legacy.py::test_legacy_openapi_paths_still_exist PASSED [ 96%]
+tests/test_regression_legacy.py::test_schema_upgrade_adds_role_column_to_existing_users_table PASSED [100%]
+
+============================== warnings summary ===============================
+..\.venv\Lib\site-packages\starlette\testclient.py:40
+  C:\Users\bhuva\Downloads\abhinav_github\CloudShield-src\CloudShield\.venv\Lib\site-packages\starlette\testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 25 passed, 1 warning in 6.09s ========================
+
+[exit code 0, 9.8s]

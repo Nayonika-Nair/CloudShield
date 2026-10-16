@@ -1,0 +1,20 @@
+flowchart TD
+  START(["Start: scan has produced an OPEN finding / recommendation"]) --> OPEN["User opens the item and reads evidence,<br/>explanation, impact and severity reason"]
+  OPEN --> SUPPORTED{"Automated plan<br/>available?"}
+  SUPPORTED -- "no" --> MANUAL["Show manual guidance<br/>(no state change)"] --> END1(["End"])
+  SUPPORTED -- "yes" --> PREVIEW["Preview: copy environment,<br/>run operations on the copy"]
+  PREVIEW --> COMPARE["Show cost, score, availability,<br/>compliance and config diff"]
+  COMPARE --> CHECK{"Baseline fingerprint<br/>unchanged?"}
+  CHECK -- "no" --> ABORT["Error - simulation must never<br/>mutate the baseline"] --> END1
+  CHECK -- "yes" --> CONFIRM{"User ticks confirmation<br/>and presses Apply?"}
+  CONFIRM -- "no" --> DISCARD["Discard preview<br/>(environment untouched)"] --> END1
+  CONFIRM -- "yes" --> HASH{"plan_hash still<br/>matches current state?"}
+  HASH -- "no" --> STALE["409 plan changed - preview again"] --> PREVIEW
+  HASH -- "yes" --> APPLY["Run operations atomically<br/>(all-or-nothing)"]
+  APPLY --> OK{"All steps valid?"}
+  OK -- "no" --> FAIL["Roll back, record REJECTED audit event,<br/>remediation status FAILED"] --> END1
+  OK -- "yes" --> SAVE["Save state (optimistic lock),<br/>audit REMEDIATION_APPLIED"]
+  SAVE --> RESCAN["Re-run all rules on the changed state"]
+  RESCAN --> GONE{"Condition still<br/>detected?"}
+  GONE -- "yes" --> NOTRES["Verification NOT_RESOLVED<br/>finding stays OPEN"] --> END2(["End"])
+  GONE -- "no" --> RES["Finding RESOLVED (kept in history)<br/>Verification VERIFIED<br/>realized saving = run-rate before - after"] --> END2

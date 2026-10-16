@@ -7,7 +7,9 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cd backend && python -m pytest tests -q",
+    "test:coverage": "cd backend && python -m pytest tests -q --cov=app --cov-report=term",
+    "walkthrough": "python scripts/ui_walkthrough.py"
   },
   "repository": {
     "type": "git",

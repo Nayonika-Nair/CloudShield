@@ -1,167 +1,137 @@
-# CloudShield – Intelligent Cloud Cost & Security Optimization Platform
+# CloudShield — Intelligent Cloud Cost & Security Optimization Platform
 
-## Project Overview
+CloudShield helps a team **understand** a cloud estate, **find** security weaknesses and wasted spend, **simulate** fixes, **apply** them after explicit confirmation and **verify** that the problem is really gone.
+It runs against a configurable, stateful **Fake AWS simulator**, so no AWS account or credentials are needed and no real infrastructure is ever touched.
 
-CloudShield is a cloud management platform designed to help organizations monitor, secure, and optimize their AWS cloud infrastructure from a single dashboard. The platform provides real-time visibility into cloud resources, identifies potential security risks, highlights unnecessary cloud expenses, and generates actionable recommendations to improve both security and cost efficiency. By combining cloud security monitoring with financial optimization, CloudShield simplifies cloud management for administrators and reduces the operational complexity of maintaining AWS environments.
+> Repository: <https://github.com/Nayonika-Nair/CloudShield> · API docs (when running): `http://localhost:8000/docs`
 
----
+```
+Configure → Provision → Observe → Analyze → Detect → Simulate → Remediate → Verify → Compare → Report
+```
 
-## Problem Statement
+## What is in the box
 
-Managing cloud infrastructure has become increasingly challenging as organizations deploy more AWS services. Cloud administrators often rely on multiple AWS tools to monitor security, analyze costs, and manage resources, making it difficult to obtain a unified view of their infrastructure. Misconfigured IAM permissions, publicly exposed resources, idle virtual machines, and unused storage can introduce security vulnerabilities while simultaneously increasing operational costs. Existing solutions are often fragmented, complex, or expensive for small and medium-sized organizations. CloudShield addresses these challenges by providing a centralized platform that combines cloud security analysis, cost optimization, resource inventory, and reporting into a single, user-friendly interface.
+| Area | What it does |
+|---|---|
+| **Fake AWS simulator** | Seeded, reproducible account: VPCs, subnets, route tables, internet gateways, ENIs, security groups, EC2, EBS, snapshots, Elastic IPs, load balancers, RDS, S3, IAM users/roles/policies. Validated lifecycle operations, quotas, a manual simulated clock, daily metrics and billing, backup schedules and key-age aging. |
+| **Detection** | 20 documented rules that read *state* (derived network reachability, IAM policy graph, metrics, billing) — findings are never injected. Severity logic is explained per finding. |
+| **Scenarios** | 10 scenarios (public bucket, open SSH/RDP, over-permissive IAM, missing encryption/backup, suspicious outbound traffic, cost spike, excess admins, risky network). Each *changes state*; the normal rules then detect it. Scenarios can be reverted. |
+| **Cost** | Simulated price list (configurable, clearly **not** AWS prices), run-rate, daily history, z-score anomaly detection, 9 recommendation rules with evidence, assumptions, risk and estimated saving. |
+| **Remediation** | Preview on an isolated copy → explicit confirmation → atomic execution → full re-scan. A finding is resolved only if the condition is gone. *Estimated*, *simulated* and *verified* values are labelled separately. |
+| **What-if** | Evaluate up to 20 changes on a copy; cost, score, exposure, downtime, compliance and config diff; proves the baseline fingerprint is unchanged. |
+| **Governance** | Append-only audit log with before/after values, configuration drift against a baseline, PDF/CSV/JSON reports built from persisted state. |
+| **Platform** | FastAPI + SQLAlchemy + PostgreSQL, JWT auth with `admin` / `analyst` / `viewer` roles, vanilla HTML/CSS/JS frontend (light theme), Docker Compose. |
 
----
+## Architecture
 
-## Target Users (Personas)
+```
+Browser (vanilla ES modules) ── REST/JSON ──► FastAPI ─► services ─► engines ─► Fake AWS simulator
+        ▲                                         │            └──────────────► PostgreSQL (users, sim_* tables)
+        └──────────── nginx (static + /api proxy) ┘
+```
 
-### Cloud Administrator
+```
+backend/app/
+  main.py            app wiring, health, CORS, consistent errors, start-up seeding
+  auth.py            bcrypt + JWT, role dependencies
+  routers/sim.py     /api/sim/* REST API          routes.py   original /api/* routes (kept)
+  services/          sim_service, scan, env_store, audit, reporting, inventory
+  engines/           network, iam, security, cost, optimization, whatif, remediation, drift, compliance, analysis
+  simulator/         config, generator, builders, lifecycle, timeengine, billing, scenarios, catalog, env
+  sim_models.py      simulator tables            models.py   users + original tables
+  providers/, security_engine.py, cost_engine.py, recommendation_engine.py   original label-based engines (kept for regression)
+frontend/            index.html, css/, js/ (api.js, state.js, navigation.js, views/*.js)
+docs/                diagrams/ (source + rendered), screenshots/, testing/, reports/ (the two PDFs)
+scripts/             schema, ERD, diagram, walkthrough, mutation and report tooling
+```
 
-Responsible for managing cloud infrastructure, monitoring resource health, ensuring secure configurations, and maintaining service availability.
+Diagrams (Mermaid source in `docs/diagrams/source`, rendered in `docs/diagrams/rendered`): system architecture, DFD 0/1, ERDs generated from the models, use case, class, component, sequence, activity, state, Fake AWS topology and the simulator / detection / what-if workflows.
 
-### DevOps Engineer
+## Prerequisites
 
-Uses CloudShield to monitor infrastructure, identify configuration issues, optimize resource utilization, and improve deployment efficiency.
+* Python 3.11+ and Git
+* PostgreSQL 16 **or** Docker Desktop (Compose v2). For a quick look you can use SQLite (`DATABASE_URL=sqlite:///./cloudshield-dev.db`).
+* Node.js is only needed to re-render diagrams.
 
-### Security Analyst
+## Configuration
 
-Monitors security findings, identifies vulnerabilities such as publicly accessible resources and missing security controls, and tracks remediation efforts.
+Copy `.env.example` to `.env` and change every value. Nothing is hard-coded; `.env` is git-ignored.
 
-### IT Manager / Project Manager
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | SQLAlchemy URL (PostgreSQL in Compose) |
+| `JWT_SECRET_KEY` | token signing key (required in Compose) |
+| `ADMIN_EMAIL/PASSWORD`, `ANALYST_*`, `VIEWER_*` | accounts created at start-up when set |
+| `SEED_DEMO_ENVIRONMENT` | generate the default demo environment on an empty database |
+| `SIM_AUTO_ADVANCE_SECONDS` | optional automatic clock advance (0 = manual only) |
+| `SERVE_FRONTEND` / `FRONTEND_DIR` | let uvicorn also serve `frontend/` (default on when the folder exists) |
+| `CORS_ORIGINS` | allowed browser origins when the UI is served elsewhere |
 
-Reviews infrastructure reports, monitors cloud spending, tracks optimization opportunities, and supports strategic decision-making.
+## Run with Docker (recommended)
 
-### Small and Medium Businesses (SMBs)
+```bash
+cp .env.example .env            # edit the secrets
+docker compose up --build
+```
 
-Organizations seeking an affordable and easy-to-use solution for monitoring AWS security and cloud costs without investing in multiple enterprise tools.
+* UI: <http://localhost:3000> (nginx proxies `/api` to the backend)
+* API + Swagger: <http://localhost:8000/docs> · health: <http://localhost:8000/health>
+* PostgreSQL data persists in the `cloudshield-pgdata` volume; tables are created automatically at start-up.
 
----
+## Run locally without Docker
 
-## Vision Statement
+```bash
+python -m venv .venv && .venv\Scripts\activate          # Windows;  source .venv/bin/activate elsewhere
+pip install -r backend/requirements-dev.txt
+set DATABASE_URL=postgresql://user:pass@localhost:5432/cloudshield   # or sqlite:///./cloudshield-dev.db
+set JWT_SECRET_KEY=change-me & set ADMIN_EMAIL=admin@example.com & set ADMIN_PASSWORD=change-me-1234
+cd backend && uvicorn app.main:app --port 8000
+```
 
-To build an intelligent cloud management platform that enables organizations to proactively secure, monitor, and optimize their AWS infrastructure through a unified, user-friendly dashboard that simplifies cloud operations, reduces operational costs, and improves overall cloud security.
+Open <http://localhost:8000> (uvicorn serves the UI too) and sign in with the admin account you configured.
+`python scripts/run_postgres.py` starts a throw-away PostgreSQL via the `pgserver` package when you have neither Docker nor a local server.
 
----
+## Using the simulator
 
-## Key Features / Goals
+1. **Simulator → Configuration**: pick a preset (clean / typical / neglected), set the seed, region, counts, utilization, misconfiguration rates, quotas, pricing and scenario probabilities, then *Generate environment*. The previous environment is archived; its history is kept.
+2. **Time & scenarios**: advance the clock manually; trigger a scenario (state changes), then **Security Findings → Run scan**.
+3. Open a finding: evidence, explanation, step-by-step reachability proof, detection rule. **Preview and remediate** → tick confirmation → **Apply**; the verification result shows whether the condition is gone.
+4. **Cost / Optimization**: anomalies, run-rate, recommendations; **What-If** to evaluate changes; **Audit & Drift** and **Reports** for governance.
 
-* Secure user authentication and login.
-* Interactive cloud management dashboard.
-* AWS resource inventory management.
-* Security findings and risk assessment.
-* Cost optimization recommendations.
-* Cloud spending analytics and visualization.
-* Infrastructure reporting and report generation.
-* Search and filtering of cloud resources.
-* Centralized monitoring interface.
-* Responsive and modern web application.
-* Containerized deployment using Docker.
-* Future integration with AWS SDK (Boto3) for live cloud data.
+Reading pages (every `GET`) never changes state or time.
 
----
+## API
 
-## Success Metrics
+Interactive docs at `/docs` (OpenAPI at `/openapi.json`). Main groups under `/api/sim`: `environments`, `time`, `resources` (+`actions`), `network/*`, `iam/*`, `metrics`, `costs/*`, `scans`, `findings`, `recommendations`, `scenarios`, `remediation/{preview,apply}`, `whatif`, `audit`, `drift`, `compliance`, `reports`, `dashboard`. Errors share one shape: `{"detail": "...", "error": {"code": "...", "message": "..."}}`. Roles: viewers read; analysts also scan, remediate, run what-ifs and make reports; admins also configure, change state, advance time and run scenarios.
 
-The project will be considered successful if it:
+## Tests
 
-* Successfully runs as a web application on localhost using Docker.
-* Provides an intuitive dashboard for cloud management.
-* Displays security findings and cloud resource information clearly.
-* Presents meaningful cost optimization recommendations.
-* Generates infrastructure reports through the application interface.
-* Offers a responsive and user-friendly experience across devices.
-* Demonstrates modular architecture suitable for future enhancements.
-* Can be extended to integrate real-time AWS services with minimal architectural changes.
+```bash
+cd backend
+python -m pytest tests -q                           # 410+ tests (SQLite by default)
+TEST_DATABASE_URL=postgresql://... python -m pytest tests -q    # same suite on PostgreSQL
+python -m pytest tests --cov=app --cov-report=term
+python ../scripts/run_mutation.py --jobs 4 security cost billing iam config   # Cosmic Ray mutation testing
+python ../scripts/ui_walkthrough.py --admin EMAIL:PASS --viewer EMAIL:PASS    # drives the real UI, captures screenshots
+```
 
----
+Layers: unit (generator, lifecycle, network, IAM, rules, cost, time, optimisation, what-if, drift), integration (simulator ↔ database, optimistic locking, transactions), API (auth/roles, validation, purity of `GET`, audit), regression (original auth, mock provider, engines, routes, persistence), frontend contract (every API call and `data-action` in the UI is wired) and an end-to-end workflow.
 
-## Assumptions
+## Demo script (≈10 minutes)
 
-* Users possess valid AWS accounts for future integration.
-* Internet connectivity is available for accessing cloud services.
-* Docker Desktop is installed for local development.
-* AWS credentials will be securely managed during future implementation.
-* Initial development uses prototype or simulated cloud data before live AWS integration.
+1. Sign in → Dashboard. 2. Simulator: *Clean* preset, 16 instances, generate. 3. Inventory & Topology: nothing exposed. 4. Time & scenarios → **SSH open to the internet** → note the "state changed" chip. 5. Run scan → new HIGH finding; open it and read the reachability steps. 6. Topology shows the instance outlined red. 7. Preview remediation (what-if, baseline unchanged) → confirm → VERIFIED. 8. Re-open the security group: the rule is gone; finding is RESOLVED with history. 9. Trigger **cost spike** with 3 days → Cost anomaly → Optimization recommendation → apply → verified saving. 10. What-If: stop an instance, show baseline unchanged. 11. Audit log, Drift, Report (PDF).
 
----
+## Known limitations
 
-## Constraints
+* Everything is simulated: prices are not AWS prices, a month is 30 days, there is no partial-day billing, one region per environment, no NAT gateways.
+* Detection covers the documented rule set only; it does not claim to find every real attack.
+* Encrypting EBS/RDS is modelled in place (real AWS needs snapshot-copy/restore); scenario revert restores the touched resources' earlier copies.
+* Alembic is not used (no migration system existed): tables are created idempotently at start-up and a startup check adds `users.role`; `database/schema.sql` is generated for reference.
+* The Docker images were written and statically validated, but **Docker was not available on the machine used for development**, so `docker compose up` was not executed there. The same stack (FastAPI + PostgreSQL 16 + static UI) was run and tested natively; see the project report.
+* The original label-based engines and mock provider are kept unchanged for regression; they under-detect compared with the state-derived rules.
 
-* Current implementation focuses primarily on AWS cloud environments.
-* Live AWS integration is outside the scope of the initial prototype.
-* Security findings and optimization recommendations are demonstration-based during the prototype phase.
-* Performance depends on the underlying cloud APIs once integrated.
-* Advanced enterprise features such as multi-cloud support, AI-based anomaly detection, and automated remediation are reserved for future development.
+## Version management
 
----
+GitHub Flow with a `develop` integration branch: `feature/simulator-core`, `feature/frontend-integration`, … merged with `--no-ff`. See `git log --graph --oneline --all`.
 
-## Future Scope
-
-- Live AWS integration using Boto3 APIs.
-- Multi-cloud support (Microsoft Azure and Google Cloud Platform).
-- AI-powered anomaly detection and predictive cloud analytics.
-- Automated security remediation and policy enforcement.
-- Email and Slack notifications for critical alerts.
-- Role-Based Access Control (RBAC).
-- Infrastructure-as-Code integration (Terraform and CloudFormation).
-- CI/CD pipeline integration.
-- Historical analytics and trend forecasting.
-- Mobile-friendly dashboard and Progressive Web App (PWA) support.
-- Kubernetes security monitoring.
-- Compliance auditing based on CIS Benchmarks, NIST, and ISO 27001.
-- Predictive cloud cost forecasting using Machine Learning.
-- Slack and Microsoft Teams integration.
-- Real-time monitoring and automated remediation.
-
----
-
-## Software Design
-CloudShield uses a consistent, modular UI that directly translates the requirements into six focused screens, with reusable components, clear navigation, and color-coded status indicators for quick understanding. The design follows progressive disclosure, showing summaries first and detailed security, cost, inventory, and reporting information only when needed.
-https://www.figma.com/design/6oVfmp0ktnxEAI0QBptFRF/CloudShield---Wireframes?node-id=0-1&p=f&t=CEc4UhZ7usdmmt5E-0
-
----
-
-## Git Workflow
-
-This project follows the **GitHub Flow** workflow.
-
-### Branches
-
-- `main` – Stable production-ready code
-- `feature/*` – New feature development
-
-### Development Process
-
-1. Create a feature branch from `main`.
-2. Develop and commit changes.
-3. Push the feature branch.
-4. Open a Pull Request.
-5. Review and merge into `main`.
-
----
-
-## Documentation
-
-Project documentation is available inside the **docs/** folder.
-
-- Wireframes
-- Architecture Diagrams
-
-- # 📁 Project Documentation
-
-| Documentation | Location |
-|---------------|----------|
-| 📄 Reports | `docs/reports/` |
-| 🏗️ Architecture Diagram | `docs/diagrams/` |
-| 🖼️ Wireframes | `docs/wireframes/` |
-| 📸 Application Screenshots | `docs/screenshots/app_running/` |
-| 🐳 Docker Installation | `docs/screenshots/docker_install/` |
-| ⚙️ Docker Build | `docs/screenshots/docker_build/` |
-
-> **Note:** All screenshots, diagrams, and supporting documentation required for the project submission are available in the **`docs/`** directory.
-- Docker Installation Screenshots
-- Application Screenshots
-- Vision Document
-- Sprint Planning
-- User Stories
-- Technical Development Workflow
-- Running Instructions
+License: see `LICENSE`.

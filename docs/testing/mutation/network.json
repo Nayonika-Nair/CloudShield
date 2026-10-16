@@ -1,0 +1,29 @@
+{
+  "name": "network",
+  "label": "Network reachability analysis",
+  "module": "app/engines/network.py",
+  "total": 100,
+  "generated": 397,
+  "annotation_excluded": 44,
+  "sampled": 100,
+  "seed": 2026,
+  "tests_round1": "tests/test_network_iam.py",
+  "tests_round2": "tests/test_network_iam.py tests/test_hardening_config_billing.py tests/test_hardening_engines.py",
+  "baseline_passed": true,
+  "round1": {
+    "killed": 40,
+    "survived": 60,
+    "incompetent": 0,
+    "score_pct": 40.0
+  },
+  "killed": 75,
+  "killed_with_failing_test_output": 75,
+  "survived": 25,
+  "incompetent": 0,
+  "newly_killed_in_round2": 35,
+  "score_pct": 75.0,
+  "pending": 0,
+  "seconds_round2": 425,
+  "exec_returncode": 0,
+  "newly_incompetent_in_round2": 0
+}

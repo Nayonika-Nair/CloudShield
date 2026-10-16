@@ -1,0 +1,20 @@
+{
+  "name": "billing",
+  "label": "Cost calculation (simulated pricing arithmetic)",
+  "module": "app/simulator/billing.py",
+  "tests": "tests/test_cost_time.py",
+  "total": 100,
+  "complete": 100,
+  "generated": 323,
+  "annotation_excluded": 22,
+  "sampled": 100,
+  "seed": 2026,
+  "survived": 6,
+  "killed": 54,
+  "killed_with_failing_test_output": 54,
+  "incompetent": 40,
+  "baseline_passed": true,
+  "score_pct": 90.0,
+  "seconds": 497,
+  "exec_returncode": 0
+}

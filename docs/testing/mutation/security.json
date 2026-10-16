@@ -1,0 +1,29 @@
+{
+  "name": "security",
+  "label": "Security detection rules and severity logic",
+  "module": "app/engines/security.py",
+  "total": 100,
+  "generated": 729,
+  "annotation_excluded": 66,
+  "sampled": 100,
+  "seed": 2026,
+  "tests_round1": "tests/test_security_rules.py",
+  "tests_round2": "tests/test_security_rules.py tests/test_hardening_config_billing.py tests/test_hardening_engines.py",
+  "baseline_passed": true,
+  "round1": {
+    "killed": 69,
+    "survived": 31,
+    "incompetent": 0,
+    "score_pct": 69.0
+  },
+  "killed": 90,
+  "killed_with_failing_test_output": 90,
+  "survived": 10,
+  "incompetent": 0,
+  "newly_killed_in_round2": 21,
+  "score_pct": 90.0,
+  "pending": 0,
+  "seconds_round2": 318,
+  "exec_returncode": 0,
+  "newly_incompetent_in_round2": 0
+}

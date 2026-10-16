@@ -1,0 +1,33 @@
+flowchart TB
+  subgraph CLIENT["Browser - vanilla HTML / CSS / JS (ES modules)"]
+    direction TB
+    VIEWS["Views: dashboard, simulator, inventory,<br/>topology, iam, security, cost,<br/>optimization, whatif, audit, reports"]
+    APIJS["api.js - fetch + JWT bearer<br/>state.js - event delegation"]
+    VIEWS --> APIJS
+  end
+
+  subgraph EDGE["Delivery"]
+    NGINX["nginx container<br/>static files + /api proxy<br/>(or uvicorn StaticFiles in dev)"]
+  end
+
+  subgraph BACKEND["FastAPI backend (uvicorn)"]
+    direction TB
+    ROUTERS["Routers<br/>routers/sim.py (/api/sim/*)<br/>routes.py (legacy /api/*)"]
+    AUTH["auth.py<br/>JWT + roles (admin / analyst / viewer)"]
+    SERVICES["Services<br/>sim_service, scan, env_store,<br/>audit, reporting, inventory"]
+    ENGINES["Engines<br/>network, iam, security, cost, optimization,<br/>whatif, remediation, drift, compliance"]
+    SIMULATOR["Fake AWS simulator<br/>config, generator, lifecycle,<br/>timeengine, scenarios, billing"]
+    ROUTERS --> AUTH
+    ROUTERS --> SERVICES
+    SERVICES --> ENGINES
+    SERVICES --> SIMULATOR
+    ENGINES --> SIMULATOR
+  end
+
+  DB[("PostgreSQL<br/>users + sim_* tables")]
+  NOAWS["No real AWS access<br/>DEMO_MODE=true, AWS_ENABLED=false"]
+
+  CLIENT -->|"HTTPS / JSON"| NGINX
+  NGINX -->|"REST"| ROUTERS
+  SERVICES -->|"SQLAlchemy ORM + Core"| DB
+  SIMULATOR -.-> NOAWS

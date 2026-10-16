@@ -1,0 +1,19 @@
+$ python -m pytest tests -q -p no:cacheprovider --junitxml=../docs/testing/results/junit-postgres.xml
+(cwd: backend)
+
+........................................................................ [ 17%]
+........................................................................ [ 34%]
+........................................................................ [ 52%]
+........................................................................ [ 69%]
+........................................................................ [ 87%]
+....................................................                     [100%]
+============================== warnings summary ===============================
+..\.venv\Lib\site-packages\starlette\testclient.py:40
+  C:\Users\bhuva\Downloads\abhinav_github\CloudShield-src\CloudShield\.venv\Lib\site-packages\starlette\testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\bhuva\Downloads\abhinav_github\CloudShield-src\CloudShield\docs\testing\results\junit-postgres.xml -
+412 passed, 1 warning in 87.10s (0:01:27)
+
+[exit code 0, 91.0s]

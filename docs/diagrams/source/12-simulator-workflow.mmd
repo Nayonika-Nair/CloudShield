@@ -1,0 +1,17 @@
+flowchart TB
+  A["1. Configure<br/>SimConfig: seed, region, counts,<br/>rates, pricing, quotas, time<br/><i>simulator/config.py</i>"]
+  B["2. Provision<br/>deterministic generation,<br/>history back-fill, baseline<br/><i>generator.py</i>"]
+  C["3. Observe<br/>inventory, topology,<br/>metrics, cost history<br/><i>inventory.py, network.py</i>"]
+  D["4. Analyse<br/>reachability, IAM graph,<br/>run-rate, anomalies<br/><i>engines/*</i>"]
+  E["5. Detect<br/>rules + recommendations,<br/>persisted findings<br/><i>security.py, scan.py</i>"]
+  F["6. Simulate<br/>what-if on an isolated copy<br/><i>whatif.py</i>"]
+  G["7. Remediate<br/>confirmed, atomic operations<br/><i>remediation.py, lifecycle.py</i>"]
+  H["8. Verify<br/>full re-scan of changed state<br/><i>scan.run_scan</i>"]
+  I["9. Compare<br/>before / after, scan diff,<br/>drift vs baseline<br/><i>drift.py</i>"]
+  J["10. Report<br/>PDF / CSV / JSON<br/><i>reporting.py</i>"]
+
+  A --> B --> C --> D --> E --> F --> G --> H --> I --> J
+  TIME["Advance simulated time<br/><i>timeengine.advance</i>"] -.-> C
+  SCEN["Scenario changes state<br/><i>scenarios.trigger</i>"] -.-> D
+  G -.->|"audit event"| AUD[("sim_audit_events")]
+  E -.-> AUD

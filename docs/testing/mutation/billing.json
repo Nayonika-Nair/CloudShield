@@ -1,0 +1,29 @@
+{
+  "name": "billing",
+  "label": "Cost calculation (simulated pricing arithmetic)",
+  "module": "app/simulator/billing.py",
+  "total": 100,
+  "generated": 323,
+  "annotation_excluded": 22,
+  "sampled": 100,
+  "seed": 2026,
+  "tests_round1": "tests/test_cost_time.py",
+  "tests_round2": "tests/test_cost_time.py tests/test_hardening_config_billing.py tests/test_hardening_engines.py",
+  "baseline_passed": true,
+  "round1": {
+    "killed": 54,
+    "survived": 6,
+    "incompetent": 40,
+    "score_pct": 90.0
+  },
+  "killed": 54,
+  "killed_with_failing_test_output": 54,
+  "survived": 4,
+  "incompetent": 42,
+  "newly_killed_in_round2": 0,
+  "score_pct": 93.1,
+  "pending": 0,
+  "seconds_round2": 56,
+  "exec_returncode": 0,
+  "newly_incompetent_in_round2": 2
+}

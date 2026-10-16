@@ -1,0 +1,53 @@
+$ git log --graph --oneline --decorate --all -n 40
+(cwd: .)
+
+* bf27885 (HEAD -> feature/documentation-evidence) Add captured UI/terminal evidence, test results and evidence register
+* 8f61b73 Add diagrams, evidence tooling, report builders and README rewrite
+*   612cd20 (develop) Merge feature/frontend-integration into develop
+|\  
+| * f629a96 (feature/frontend-integration) Integrate the frontend with the simulator API
+|/  
+*   77cc29c Merge feature/simulator-core into develop
+|\  
+| * cc03230 (feature/simulator-core) Add Docker/Compose setup, env template, generated PostgreSQL schema and local Postgres helper
+| * 0314db7 Add what-if, drift, API, integration, regression and end-to-end tests
+| * e0edbdc Add unit tests for generator, lifecycle, network, IAM, security rules, cost and time
+| * 78c1213 Persist simulator state and expose the simulation API
+| * 3279cd9 Add analysis engines: IAM, cost, security rules, optimisation, what-if, drift
+| * ee19f1a Add Fake AWS simulator core: config, deterministic generator, lifecycle, time engine, scenarios
+|/  
+* 07e3f7b (origin/main, origin/HEAD, main) Add software design section to README
+*   8e4133f Merge branch 'feature/authentication'
+|\  
+| * 32a672b (origin/feature/authentication) Add architecture diagrams
+| * c472e6c Add CloudShield authentication and application features
+| *   f327b82 Merge pull request #27 from Nayonika-Nair/main
+| |\  
+* | \   0a78b59 Merge branch 'main' of https://github.com/Nayonika-Nair/CloudShield
+|\ \ \  
+| * | | 3f53737 Enhance README with project documentation details
+* | | | bc310c9 docs: restore Vision Document with comprehensive project details and features
+|/ / /  
+* | | 8cb8f32 docs: add project documentation, architecture, workflow, and Docker setup
+* | | 80671bb Revise README for project overview and user personas
+* | | 711f13e Update README with GitHub Flow documentation
+| |/  
+|/|   
+* | 6ea00af Add placeholder files for frontend structure
+* | 4f531aa Remove duplicate CloudShield folder
+* |   2178561 Merge branch 'main' of https://github.com/Nayonika-Nair/CloudShield
+|\ \  
+| * | 83693e2 Merge pull request #26 from Nayonika-Nair/feature/authentication
+| |\| 
+| | * 270b4e0 Add GitHub Flow documentation
+| |/  
+| * e606689 Add .gitignore
+| *   d96a180 Merge branch 'main' of https://github.com/Nayonika-Nair/CloudShield
+| |\  
+| | * 2f7ed46 Streamline target user sections in README
+| | * 6ea14cf Update README.md
+| | * 92bfbe0 Vision Document
+| * df32548 Setup initial project structure
+* fcf5087 Initial project setup
+
+[exit code 0, 0.1s]

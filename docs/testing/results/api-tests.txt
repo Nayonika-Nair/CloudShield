@@ -1,0 +1,54 @@
+$ python -m pytest tests/test_api.py -v -p no:cacheprovider
+(cwd: backend)
+
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\bhuva\Downloads\abhinav_github\CloudShield-src\CloudShield\.venv\Scripts\python.exe
+rootdir: C:\Users\bhuva\Downloads\abhinav_github\CloudShield-src\CloudShield\backend
+plugins: anyio-4.15.1, platformdirs-4.13.3, cov-6.0.0
+collecting ... collected 35 items
+
+tests/test_api.py::test_every_simulator_endpoint_requires_authentication PASSED [  2%]
+tests/test_api.py::test_roles_control_who_can_change_state PASSED        [  5%]
+tests/test_api.py::test_registration_creates_a_viewer_who_cannot_modify_the_simulator PASSED [  8%]
+tests/test_api.py::test_tampered_or_garbage_token_is_rejected PASSED     [ 11%]
+tests/test_api.py::test_no_environment_gives_a_clear_404 PASSED          [ 14%]
+tests/test_api.py::test_invalid_configuration_returns_422_with_readable_message PASSED [ 17%]
+tests/test_api.py::test_request_body_validation_uses_consistent_error_shape PASSED [ 20%]
+tests/test_api.py::test_unknown_ids_return_404_not_500 PASSED            [ 22%]
+tests/test_api.py::test_get_requests_never_change_state_time_or_audit_log PASSED [ 25%]
+tests/test_api.py::test_environment_generation_is_reproducible_across_api_calls PASSED [ 28%]
+tests/test_api.py::test_regenerating_archives_the_old_environment_and_keeps_history PASSED [ 31%]
+tests/test_api.py::test_time_advance_updates_clock_metrics_and_costs_and_is_audited PASSED [ 34%]
+tests/test_api.py::test_inventory_pagination_filters_and_details PASSED  [ 37%]
+tests/test_api.py::test_lifecycle_action_changes_state_and_is_audited_with_before_after PASSED [ 40%]
+tests/test_api.py::test_invalid_and_duplicate_operations_are_rejected_without_changing_state_but_are_audited PASSED [ 42%]
+tests/test_api.py::test_duplicate_bucket_and_quota_conflicts_return_409 PASSED [ 45%]
+tests/test_api.py::test_pricing_can_be_changed_but_structural_config_cannot PASSED [ 48%]
+tests/test_api.py::test_scenario_changes_state_first_and_findings_only_appear_after_a_scan PASSED [ 51%]
+tests/test_api.py::test_scenario_can_be_reverted_and_revert_is_audited PASSED [ 54%]
+tests/test_api.py::test_time_dependent_scenario_surfaces_through_metrics_scan_and_cost_anomaly PASSED [ 57%]
+tests/test_api.py::test_scan_history_comparison_and_finding_lifecycle PASSED [ 60%]
+tests/test_api.py::test_remediation_requires_preview_hash_and_explicit_confirmation PASSED [ 62%]
+tests/test_api.py::test_remediation_changes_state_rescans_and_resolves_only_when_condition_is_gone PASSED [ 65%]
+tests/test_api.py::test_remediation_that_does_not_fix_the_condition_is_reported_as_not_resolved PASSED [ 68%]
+tests/test_api.py::test_cost_recommendation_lifecycle_estimated_then_verified PASSED [ 71%]
+tests/test_api.py::test_unsupported_remediation_is_reported_not_attempted PASSED [ 74%]
+tests/test_api.py::test_whatif_through_api_leaves_baseline_untouched_until_explicit_apply PASSED [ 77%]
+tests/test_api.py::test_failing_whatif_is_rejected_without_state_change PASSED [ 80%]
+tests/test_api.py::test_audit_log_is_append_only_filterable_and_paginated PASSED [ 82%]
+tests/test_api.py::test_drift_and_baseline_endpoints PASSED              [ 85%]
+tests/test_api.py::test_reports_are_built_from_state_and_downloadable PASSED [ 88%]
+tests/test_api.py::test_presets_and_saved_configurations PASSED          [ 91%]
+tests/test_api.py::test_dashboard_aggregates_real_state PASSED           [ 94%]
+tests/test_api.py::test_network_and_iam_endpoints_return_derived_analysis PASSED [ 97%]
+tests/test_api.py::test_health_endpoints_are_public PASSED               [100%]
+
+============================== warnings summary ===============================
+..\.venv\Lib\site-packages\starlette\testclient.py:40
+  C:\Users\bhuva\Downloads\abhinav_github\CloudShield-src\CloudShield\.venv\Lib\site-packages\starlette\testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 35 passed, 1 warning in 29.14s ========================
+
+[exit code 0, 33.2s]

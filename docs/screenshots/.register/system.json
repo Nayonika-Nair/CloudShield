@@ -1,0 +1,29 @@
+[
+  {
+    "file": "docs/screenshots/docker/docker-availability.png",
+    "category": "docker",
+    "title": "Docker availability check on the development machine",
+    "purpose": "Honest record: Docker is not installed here, so image build / compose up could not be executed.",
+    "source_output": "docs/testing/results/docker-availability.txt",
+    "rc": 1,
+    "expected_rc": 1
+  },
+  {
+    "file": "docs/screenshots/docker/compose-static-validation.png",
+    "category": "docker",
+    "title": "Static validation of docker-compose.yml and Dockerfiles",
+    "purpose": "Compose file parses, defines db/backend/frontend with health checks, a named volume and dependency conditions (not a substitute for a real build).",
+    "source_output": "docs/testing/results/compose-static-validation.txt",
+    "rc": 0,
+    "expected_rc": 0
+  },
+  {
+    "file": "docs/screenshots/docker/native-startup-persistence.png",
+    "category": "docker",
+    "title": "Clean start, health check and persistence across restart (native, PostgreSQL 16)",
+    "purpose": "The same stack (FastAPI + PostgreSQL) started from an empty database, health-checked, restarted, with identical data afterwards.",
+    "source_output": "docs/testing/results/native-startup-persistence.txt",
+    "rc": 0,
+    "expected_rc": 0
+  }
+]

@@ -1,0 +1,23 @@
+flowchart TD
+  IN["Proposed changes (1-20 operations)<br/>e.g. ec2.stop, ec2.change_type, sg.revoke_ingress,<br/>s3.make_private, rds.enable_encryption, iam.detach_policy"]
+  FP1["Record baseline fingerprint<br/>(SHA-256 of resources, metrics, costs, clock)"]
+  BASE["analysis.analyze(baseline)<br/>findings, score, run-rate, compliance, exposure"]
+  COPY["env.copy() - isolated deep copy"]
+  RUN["run_operations(copy)<br/>validated, all-or-nothing"]
+  FAIL{"Any step invalid?"}
+  ERR["Return error - nothing persisted"]
+  HYPO["analysis.analyze(copy)"]
+  DIFF["Compare: cost delta, findings resolved / introduced,<br/>score delta, exposure, downtime + dependents,<br/>compliance %, config diff"]
+  FP2{"Baseline fingerprint<br/>unchanged?"}
+  STORE["Store what-if run (status SIMULATED)<br/>audit WHATIF_EXECUTED"]
+  APPLY{"User later chooses<br/>Apply + confirm?"}
+  REAL["run_operations(real environment)<br/>status APPLIED, audit WHATIF_APPLIED"]
+  KEEP["Baseline remains untouched"]
+
+  IN --> FP1 --> BASE --> COPY --> RUN --> FAIL
+  FAIL -- "yes" --> ERR
+  FAIL -- "no" --> HYPO --> DIFF --> FP2
+  FP2 -- "yes" --> STORE --> APPLY
+  FP2 -- "no" --> ERR
+  APPLY -- "no" --> KEEP
+  APPLY -- "yes" --> REAL

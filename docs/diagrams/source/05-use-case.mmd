@@ -1,0 +1,34 @@
+flowchart LR
+  VIEWER(["Viewer"])
+  ANALYST(["Analyst"])
+  ADMIN(["Administrator"])
+
+  subgraph SYSTEM["CloudShield + Fake AWS simulator"]
+    direction TB
+    UC1(["Sign in / sign up"])
+    UC2(["View dashboard"])
+    UC3(["Browse resource inventory"])
+    UC4(["View network topology & reachability"])
+    UC5(["View IAM analysis"])
+    UC6(["View findings with evidence"])
+    UC7(["View cost, anomalies, recommendations"])
+    UC8(["View audit log & drift"])
+    UC9(["Run security / cost scan"])
+    UC10(["Preview remediation"])
+    UC11(["Apply & verify remediation"])
+    UC12(["Run what-if simulation"])
+    UC13(["Generate & download report"])
+    UC14(["Configure & generate environment"])
+    UC15(["Advance simulated time"])
+    UC16(["Trigger / revert scenario"])
+    UC17(["Run lifecycle operation"])
+    UC18(["Change live pricing & thresholds"])
+    UC19(["Capture drift baseline"])
+  end
+
+  VIEWER --- UC1 & UC2 & UC3 & UC4 & UC5 & UC6 & UC7 & UC8
+  ANALYST --- UC9 & UC10 & UC11 & UC12 & UC13
+  ADMIN --- UC14 & UC15 & UC16 & UC17 & UC18 & UC19
+  ANALYST -.->|"includes viewer rights"| VIEWER
+  ADMIN -.->|"includes analyst rights"| ANALYST
+  UC11 -.->|"include"| UC10

@@ -1,0 +1,5 @@
+[
+ {"id":"git-branches","category":"version-management","title":"Git branches","purpose":"Branches used by the GitHub-Flow workflow (main, develop, feature branches).","cmd":"git branch -a -vv","cwd":".","max_lines":30,"head":4},
+ {"id":"git-graph","category":"version-management","title":"Git history graph","purpose":"Meaningful commits and --no-ff merges of feature branches into develop.","cmd":"git log --graph --oneline --decorate --all -n 40","cwd":".","max_lines":46,"head":4},
+ {"id":"git-status-remote","category":"version-management","title":"Repository, remote and working-tree state","purpose":"Remote URL and clean working tree after the commits (nothing is pushed by the tooling).","cmd":"git remote -v && git status -sb && git shortlog -sn --all","cwd":".","max_lines":30,"head":4}
+]

@@ -1,0 +1,21 @@
+$ python ../scripts/mutation_summary.py
+(cwd: backend)
+
+module                           generated  annot.  tested  killed survived incomp.  round1   final
+---------------------------------------------------------------------------------------------------
+app/simulator/billing.py               323      22     100      54        4      42   90.0%   93.1%
+app/simulator/config.py                690      11     100      78       22       0   53.0%   78.0%
+app/engines/cost.py                    402       0     100      79       15       6   58.5%   84.0%
+app/engines/iam.py                     353      22     100      77       23       0   63.0%   77.0%
+app/engines/network.py                 397      44     100      75       25       0   40.0%   75.0%
+app/engines/optimization.py            937      66     100      80        8      12   58.1%   90.9%
+app/engines/remediation.py              17       0      17      16        0       1   62.5%  100.0%
+app/engines/security.py                729      66     100      90       10       0   69.0%   90.0%
+---------------------------------------------------------------------------------------------------
+ALL MODULES                           3848     231     717     549      107      61   60.0%   83.7%
+
+round1 = targeted tests only; final = after hardening tests were added and the survivors re-run (round 2).
+score = killed / (killed + survived); incompetent mutants (could not be tested) are excluded.
+mutants are a seeded random sample (seed 2026) of those generated, annotation-only mutants excluded.
+
+[exit code 0, 0.3s]

@@ -1,0 +1,13 @@
+flowchart LR
+  ADMIN["Administrator"]
+  ANALYST["Security / Cost Analyst"]
+  VIEWER["Viewer"]
+  CS(("0<br/>CloudShield<br/>System<br/>(with Fake AWS simulator)"))
+
+  ADMIN -->|"credentials, environment configuration,<br/>lifecycle commands, time advance, scenarios"| CS
+  ANALYST -->|"scan requests, remediation confirmation,<br/>what-if changes, report requests"| CS
+  VIEWER -->|"read-only queries"| CS
+
+  CS -->|"environment state, resources, topology"| ADMIN
+  CS -->|"findings with evidence, recommendations,<br/>what-if comparison, verification results"| ANALYST
+  CS -->|"dashboards, audit log, reports (PDF / CSV / JSON)"| VIEWER

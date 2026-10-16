@@ -1,0 +1,20 @@
+{
+  "name": "optimization",
+  "label": "Cost recommendation rules",
+  "module": "app/engines/optimization.py",
+  "tests": "tests/test_cost_time.py tests/test_whatif_drift.py",
+  "total": 100,
+  "complete": 100,
+  "generated": 937,
+  "annotation_excluded": 66,
+  "sampled": 100,
+  "seed": 2026,
+  "survived": 39,
+  "killed": 54,
+  "killed_with_failing_test_output": 54,
+  "incompetent": 7,
+  "baseline_passed": true,
+  "score_pct": 58.1,
+  "seconds": 769,
+  "exec_returncode": 0
+}
