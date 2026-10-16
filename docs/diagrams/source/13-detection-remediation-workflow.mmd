@@ -1,0 +1,30 @@
+flowchart LR
+  subgraph STATE["Simulated state (source of truth)"]
+    NET["VPC, subnets, route tables,<br/>IGW, ENIs, security groups"]
+    IAMS["IAM users, roles,<br/>policies, trust, keys"]
+    DATA["S3, EBS, RDS,<br/>snapshots, backups"]
+    MET["Metrics + daily billing"]
+  end
+
+  subgraph DETECT["Detection"]
+    REACH["network.exposures()<br/>step-by-step reachability"]
+    IAMA["iam.analyze()<br/>policy evaluation, escalation BFS"]
+    ANOM["cost.detect_anomalies()<br/>z-score vs trailing window"]
+    RULES["security.evaluate()<br/>20 documented rules"]
+  end
+
+  NET --> REACH --> RULES
+  IAMS --> IAMA --> RULES
+  DATA --> RULES
+  MET --> ANOM --> RULES
+
+  RULES --> FIND["Findings: id, severity, category, resource,<br/>evidence, explanation, impact,<br/>rule logic, first/last seen, status"]
+  FIND --> PLAN["Remediation plan<br/>(operations + risk + plan_hash)"]
+  PLAN --> PREV["Preview (what-if copy)"]
+  PREV --> CONF{"Explicit<br/>confirmation"}
+  CONF -- "confirmed" --> EXEC["Execute on simulated state"]
+  EXEC --> STATE
+  EXEC --> RESCAN["Re-scan"]
+  RESCAN --> VERDICT{"Still detected?"}
+  VERDICT -- "no" --> RESOLVED["RESOLVED / VERIFIED"]
+  VERDICT -- "yes" --> OPEN["Stays OPEN / NOT_RESOLVED"]

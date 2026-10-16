@@ -1,0 +1,34 @@
+stateDiagram-v2
+  direction LR
+
+  state "Finding lifecycle" as F {
+    [*] --> OPEN: scan detects condition
+    OPEN --> OPEN: later scan still detects (last_seen updated)
+    OPEN --> RESOLVED: scan no longer detects<br/>(REMEDIATED or NO_LONGER_DETECTED)
+    RESOLVED --> [*]
+    note right of RESOLVED
+      Row is kept for history.
+      If the condition returns,
+      a NEW OPEN row is created.
+    end note
+  }
+
+  state "Recommendation lifecycle" as R {
+    [*] --> ROPEN: scan generates
+    ROPEN --> APPLIED: remediation executed
+    APPLIED --> VERIFIED: re-scan no longer finds it
+    APPLIED --> ROPEN: re-scan still finds it
+    ROPEN --> STALE: condition disappears<br/>by other means
+    VERIFIED --> [*]
+    STALE --> [*]
+  }
+
+  state "EC2 instance state" as E {
+    [*] --> running: ec2.create
+    running --> stopped: ec2.stop
+    stopped --> running: ec2.start
+    stopped --> stopped: ec2.change_type
+    running --> terminated: ec2.terminate
+    stopped --> terminated: ec2.terminate
+    terminated --> [*]
+  }

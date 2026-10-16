@@ -1,0 +1,35 @@
+sequenceDiagram
+  autonumber
+  actor U as Analyst
+  participant UI as Browser UI (remediation.js)
+  participant API as FastAPI /api/sim
+  participant SVC as sim_service
+  participant ENG as engines (analysis, whatif, remediation)
+  participant SIM as Environment (in memory)
+  participant DB as PostgreSQL
+
+  U->>UI: Open finding, "Preview and remediate"
+  UI->>API: POST /remediation/preview {kind, id}
+  API->>SVC: preview_remediation()
+  SVC->>DB: load active environment + history
+  DB-->>SVC: rows
+  SVC->>ENG: analysis.analyze(env)
+  ENG-->>SVC: fresh findings + plan (operations, plan_hash)
+  SVC->>ENG: whatif.simulate(env, operations)
+  ENG->>SIM: env.copy() and apply operations on the copy
+  ENG-->>SVC: comparison (cost, score, downtime, diff), baseline_unchanged = true
+  SVC->>DB: store what-if run + audit REMEDIATION_PREVIEWED
+  SVC-->>UI: PROPOSED plan + preview
+  U->>UI: Tick confirmation, "Apply"
+  UI->>API: POST /remediation/apply {plan_hash, confirm=true}
+  API->>SVC: apply_remediation()
+  SVC->>ENG: re-analyse and compare plan_hash (409 if changed)
+  SVC->>ENG: run_operations(env, operations) all-or-nothing
+  ENG->>SIM: lifecycle.execute for each step
+  SVC->>DB: save resources (optimistic lock on state_version)
+  SVC->>DB: remediation record EXECUTED + audit REMEDIATION_APPLIED
+  SVC->>ENG: run_scan() verification re-analysis
+  ENG-->>SVC: findings no longer detected?
+  SVC->>DB: finding RESOLVED / remediation VERIFIED + audit REMEDIATION_VERIFIED
+  SVC-->>UI: EXECUTED + VERIFIED (or NOT_RESOLVED)
+  UI-->>U: before/after, score and run-rate

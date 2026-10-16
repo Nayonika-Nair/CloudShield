@@ -1,0 +1,45 @@
+flowchart TB
+  INET(("Internet"))
+
+  subgraph ACCOUNT["Fake AWS account (simulated) - region us-east-1"]
+    direction TB
+    subgraph IAMG["IAM"]
+      direction LR
+      USERS["Users<br/>admin (designated), developers,<br/>read-only, svc-ci"]
+      ROLES["Roles<br/>ec2-app-role, deploy-role,<br/>readonly-role, admin-role"]
+      POLS["Policies<br/>AdministratorAccess, ReadOnlyAccess,<br/>S3AppAccess, EC2Operator, ..."]
+      USERS -->|"sts:AssumeRole (trust policy)"| ROLES
+      USERS & ROLES --> POLS
+    end
+
+    S3["S3 buckets<br/>private by default,<br/>encryption, public-access block"]
+
+    subgraph VPC["VPC 10.10.0.0/16 (prod) - 2nd VPC for dev"]
+      direction TB
+      IGW["Internet gateway"]
+      subgraph PUB["Public subnets (route 0.0.0.0/0 -> IGW)"]
+        direction LR
+        WEB["EC2 web + bastion<br/>ENI + public IP / EIP"]
+        ALB["Load balancer"]
+      end
+      subgraph PRIV["Private subnets (local route only)"]
+        direction LR
+        APP["EC2 app / worker / batch<br/>ENI (private IP only)"]
+        RDS[("RDS instances<br/>db SG, backups, encryption")]
+        EBS[["EBS volumes + snapshots<br/>backup policy"]]
+      end
+      SGW["Security groups: web, bastion, app, db"]
+      IGW --> PUB
+      ALB --> WEB
+      WEB -.-> SGW
+      APP -.-> SGW
+      RDS -.-> SGW
+      APP --> RDS
+      APP --- EBS
+      WEB --- EBS
+    end
+  end
+
+  INET <-->|"reachable only if SG rule + public address + IGW route"| IGW
+  ROLES -.->|"instance profile"| APP
+  APP -.->|"S3AppAccess"| S3

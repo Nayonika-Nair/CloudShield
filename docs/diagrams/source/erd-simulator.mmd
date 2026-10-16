@@ -1,0 +1,235 @@
+erDiagram
+  sim_environments {
+    int id PK
+    string name
+    int seed
+    string status
+    string account_id
+    string account_name
+    string region
+    json config
+    datetime sim_time
+    int state_version
+    json id_counters
+    json baseline
+    string baseline_time
+    string fingerprint
+    datetime created_at
+    datetime archived_at
+  }
+  sim_saved_configs {
+    int id PK
+    string name UK
+    json config
+    datetime created_at
+    datetime updated_at
+  }
+  sim_audit_events {
+    int id PK
+    int environment_id FK
+    datetime timestamp
+    datetime sim_time
+    string actor
+    string action
+    string target_type
+    string target_id
+    string outcome
+    json before
+    json after
+    json details
+  }
+  sim_cost_daily {
+    int id PK
+    int environment_id FK
+    string resource_id
+    string service
+    date cost_date
+    float amount
+  }
+  sim_metrics {
+    int id PK
+    int environment_id FK
+    string resource_id
+    string metric
+    date metric_date
+    float value
+  }
+  sim_recommendations {
+    int id PK
+    int environment_id FK
+    string rec_key
+    string rule_id
+    string category
+    string rec_type
+    string title
+    string resource_id
+    string resource_type
+    string resource_name
+    text reason
+    json evidence
+    float current_monthly_cost
+    float estimated_monthly_savings
+    float realized_monthly_savings
+    json assumptions
+    text risk
+    text recommended_action
+    json remediation
+    string priority
+    float confidence
+    string status
+    boolean simulated
+    int whatif_id
+    datetime first_seen_sim
+    datetime last_seen_sim
+    datetime created_at
+    datetime applied_at
+    datetime verified_at
+    int remediation_id
+  }
+  sim_relationships {
+    int id PK
+    int environment_id FK
+    string source_id
+    string target_id
+    string relation
+  }
+  sim_remediations {
+    int id PK
+    int environment_id FK
+    string target_kind
+    int target_id
+    string target_key
+    json plan
+    string plan_hash
+    string status
+    string verification
+    string actor
+    datetime executed_at
+    datetime executed_sim
+    json results
+    json before
+    json after
+    int scan_before_id
+    int scan_after_id
+    float cost_before
+    float cost_after
+    int score_before
+    int score_after
+    float realized_monthly_savings
+    text message
+  }
+  sim_reports {
+    int id PK
+    int environment_id FK
+    string report_type
+    string title
+    datetime created_at
+    datetime sim_time
+    string actor
+    json content
+  }
+  sim_resources {
+    int id PK
+    int environment_id FK
+    string resource_id
+    string resource_type
+    string name
+    string state
+    string region
+    json data
+    string data_hash
+  }
+  sim_scans {
+    int id PK
+    int environment_id FK
+    string trigger
+    int state_version
+    datetime sim_time
+    datetime started_at
+    datetime completed_at
+    string status
+    int security_score
+    int findings_open
+    int new_findings
+    int resolved_findings
+    json severity_counts
+    float monthly_run_rate
+    float potential_savings
+    json finding_keys
+    json compliance
+    string actor
+  }
+  sim_scenario_executions {
+    int id PK
+    int environment_id FK
+    string scenario
+    json params
+    string status
+    string actor
+    datetime triggered_at
+    datetime triggered_sim
+    json result
+    json before
+    json changes
+    datetime reverted_at
+  }
+  sim_whatif_runs {
+    int id PK
+    int environment_id FK
+    datetime created_at
+    string actor
+    string title
+    json changes
+    json result
+    string baseline_fingerprint
+    int state_version
+    string status
+    datetime applied_at
+  }
+  sim_findings {
+    int id PK
+    int environment_id FK
+    string finding_key
+    string rule_id
+    string rule_name
+    string category
+    string severity
+    text severity_reason
+    string resource_id
+    string resource_type
+    string resource_name
+    string title
+    text explanation
+    text impact
+    text recommendation
+    text detection_rule
+    json evidence
+    json remediation
+    string status
+    string resolution
+    datetime first_seen_sim
+    datetime last_seen_sim
+    datetime first_seen_at
+    datetime last_seen_at
+    datetime resolved_at
+    datetime resolved_sim
+    int first_scan_id FK
+    int last_scan_id FK
+    int resolved_scan_id FK
+    int remediation_id
+  }
+  sim_environments ||--o{ sim_audit_events : "environment_id"
+  sim_environments ||--o{ sim_cost_daily : "environment_id"
+  sim_environments ||--o{ sim_metrics : "environment_id"
+  sim_environments ||--o{ sim_recommendations : "environment_id"
+  sim_environments ||--o{ sim_relationships : "environment_id"
+  sim_environments ||--o{ sim_remediations : "environment_id"
+  sim_environments ||--o{ sim_reports : "environment_id"
+  sim_environments ||--o{ sim_resources : "environment_id"
+  sim_environments ||--o{ sim_scans : "environment_id"
+  sim_environments ||--o{ sim_scenario_executions : "environment_id"
+  sim_environments ||--o{ sim_whatif_runs : "environment_id"
+  sim_environments ||--o{ sim_findings : "environment_id"
+  sim_scans ||--o{ sim_findings : "first_scan_id"
+  sim_scans ||--o{ sim_findings : "last_scan_id"
+  sim_scans ||--o{ sim_findings : "resolved_scan_id"

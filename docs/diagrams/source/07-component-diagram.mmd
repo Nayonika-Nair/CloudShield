@@ -1,0 +1,58 @@
+flowchart TB
+  subgraph FE["Frontend (static)"]
+    direction LR
+    SHELL["index.html<br/>shell + login"]
+    CORE["api.js, state.js, navigation.js,<br/>auth.js, utils.js"]
+    VIEWSC["views/*.js<br/>11 views"]
+    SHARED["remediation.js, actionform.js,<br/>topology_graph.js"]
+    SHELL --> CORE --> VIEWSC --> SHARED
+  end
+
+  subgraph BE["Backend (FastAPI)"]
+    direction TB
+    subgraph IF["Interface"]
+      MAIN["main.py<br/>health, CORS, errors, lifespan"]
+      RSIM["routers/sim.py"]
+      RLEG["routes.py (legacy)"]
+      AUTHC["auth.py - JWT, bcrypt, roles"]
+    end
+    subgraph APP["Application services"]
+      SSIM["sim_service.py"]
+      SSCAN["scan.py"]
+      SSTORE["env_store.py"]
+      SAUD["audit.py"]
+      SREP["reporting.py"]
+      SINV["inventory.py"]
+    end
+    subgraph DOMAIN["Analysis engines"]
+      ENET["network"]
+      EIAM["iam"]
+      ESEC["security"]
+      ECOST["cost + optimization"]
+      EWHAT["whatif + remediation"]
+      EDRIFT["drift + compliance"]
+    end
+    subgraph SIMC["Simulator"]
+      GEN["config + generator"]
+      LIFE["lifecycle"]
+      TIME["timeengine + billing"]
+      SCEN["scenarios"]
+    end
+    subgraph LEG["Legacy (kept)"]
+      PROV["providers/mock_provider"]
+      LENG["security_engine, cost_engine,<br/>recommendation_engine"]
+    end
+  end
+
+  DBC[("PostgreSQL<br/>SQLAlchemy models:<br/>models.py + sim_models.py")]
+
+  FE -->|"REST /api/*"| IF
+  RSIM --> APP
+  RLEG --> LEG
+  APP --> DOMAIN
+  APP --> SIMC
+  DOMAIN --> SIMC
+  SSTORE --> DBC
+  SSCAN --> DBC
+  SAUD --> DBC
+  RLEG --> DBC

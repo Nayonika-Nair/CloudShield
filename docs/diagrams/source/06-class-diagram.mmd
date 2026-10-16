@@ -1,0 +1,185 @@
+classDiagram
+  direction LR
+
+  class SimConfig {
+    +name
+    +preset
+    +seed
+    +account_id
+    +region
+    +counts
+    +utilization
+    +security
+    +thresholds
+    +quotas
+    +time
+    +pricing
+    +scenario_probabilities
+    +to_dict()
+  }
+
+  class Environment {
+    +config
+    +sim_time
+    +resources
+    +metrics
+    +daily_costs
+    +baseline
+    +new_id(prefix)
+    +find(id)
+    +get(id, type)
+    +add(type, res)
+    +remove(id)
+    +copy()
+    +fingerprint()
+    +snapshot_resources()
+  }
+
+  class SimError {
+    +message
+    +code
+    +status
+  }
+
+  class OpSpec {
+    +name
+    +target_type
+    +params
+    +risk
+    +fn
+  }
+
+  class Generator {
+    <<module simulator.generator>>
+    +generate_environment(config)
+  }
+  class Lifecycle {
+    <<module simulator.lifecycle>>
+    +OPS
+    +execute(env, action, target, params)
+    +catalog()
+  }
+  class TimeEngine {
+    <<module simulator.timeengine>>
+    +advance(env, days)
+    +backfill(env, days)
+  }
+  class Scenarios {
+    <<module simulator.scenarios>>
+    +trigger(env, name, params)
+    +revert(env, before, changes)
+  }
+
+  class NetworkEngine {
+    <<module engines.network>>
+    +exposures(env)
+    +topology(env)
+    +egress_profile(env, instance)
+  }
+  class IamEngine {
+    <<module engines.iam>>
+    +evaluate(env, principal, action)
+    +escalation_paths(env)
+    +analyze(env)
+  }
+  class SecurityEngine {
+    <<module engines.security>>
+    +RULES
+    +evaluate(env)
+    +score(findings)
+  }
+  class CostEngine {
+    <<module engines.cost>>
+    +monthly_run_rate(env)
+    +history(env)
+    +detect_anomalies(env)
+  }
+  class Optimization {
+    <<module engines.optimization>>
+    +recommend(env)
+  }
+  class WhatIf {
+    <<module engines.whatif>>
+    +simulate(env, changes)
+  }
+  class Remediation {
+    <<module engines.remediation>>
+    +run_operations(env, ops)
+    +plan_hash(ops)
+  }
+
+  class SimEnvironment {
+    <<ORM sim_environments>>
+    +id
+    +seed
+    +status
+    +config
+    +sim_time
+    +state_version
+    +baseline
+  }
+  class SimScan {
+    <<ORM sim_scans>>
+    +security_score
+    +findings_open
+    +monthly_run_rate
+  }
+  class SimFinding {
+    <<ORM sim_findings>>
+    +finding_key
+    +severity
+    +status
+    +evidence
+    +first_seen_sim
+    +resolved_sim
+  }
+  class SimRecommendation {
+    <<ORM sim_recommendations>>
+    +rec_key
+    +estimated_monthly_savings
+    +realized_monthly_savings
+    +status
+  }
+  class SimRemediation {
+    <<ORM sim_remediations>>
+    +plan_hash
+    +status
+    +verification
+  }
+  class SimAuditEvent {
+    <<ORM sim_audit_events>>
+    +action
+    +outcome
+    +before
+    +after
+  }
+  class User {
+    <<ORM users>>
+    +email
+    +password_hash
+    +role
+  }
+
+  SimConfig --> Generator : validated input
+  Generator ..> Environment : creates
+  Lifecycle ..> Environment : mutates
+  Lifecycle o-- OpSpec : registry
+  Lifecycle ..> SimError : raises
+  TimeEngine ..> Environment : advances
+  Scenarios ..> Lifecycle : uses
+  NetworkEngine ..> Environment : reads
+  IamEngine ..> Environment : reads
+  CostEngine ..> Environment : reads
+  SecurityEngine ..> NetworkEngine
+  SecurityEngine ..> IamEngine
+  SecurityEngine ..> CostEngine
+  Optimization ..> CostEngine
+  WhatIf ..> Environment : copy()
+  WhatIf ..> Remediation
+  Remediation ..> Lifecycle
+  SimEnvironment "1" --> "*" SimScan
+  SimEnvironment "1" --> "*" SimFinding
+  SimEnvironment "1" --> "*" SimRecommendation
+  SimEnvironment "1" --> "*" SimRemediation
+  SimEnvironment "1" --> "*" SimAuditEvent
+  SimScan "1" --> "*" SimFinding : first / last / resolved

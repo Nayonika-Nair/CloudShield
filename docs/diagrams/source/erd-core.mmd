@@ -1,0 +1,69 @@
+erDiagram
+  cloud_resources {
+    int id PK
+    string resource_id UK
+    string name
+    string resource_type
+    string region
+    string status
+    string security_state
+    datetime created_at
+    datetime updated_at
+  }
+  cost_opportunities {
+    int id PK
+    string title
+    string resource_id
+    text explanation
+    text action
+    decimal monthly_savings
+    string priority
+    string status
+    datetime created_at
+  }
+  cost_records {
+    int id PK
+    string service
+    decimal amount
+    string currency
+    datetime recorded_at
+  }
+  recommendations {
+    int id PK
+    string title
+    string category
+    string priority
+    text explanation
+    text action
+    decimal confidence
+    string status
+    datetime created_at
+  }
+  scans {
+    int id PK
+    datetime started_at
+    datetime completed_at
+    string status
+    int security_score
+    int findings_count
+    decimal monthly_cost
+    decimal potential_savings
+  }
+  security_findings {
+    int id PK
+    string title
+    string severity
+    string resource_id
+    text description
+    text risk
+    text recommendation
+    string status
+    datetime created_at
+  }
+  users {
+    int id PK
+    string email UK
+    string password_hash
+    string role
+    datetime created_at
+  }

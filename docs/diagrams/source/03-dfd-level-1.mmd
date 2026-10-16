@@ -1,0 +1,55 @@
+flowchart TB
+  USER["User<br/>(admin / analyst / viewer)"]
+
+  P1(("1.0<br/>Authenticate<br/>& authorise"))
+  P2(("2.0<br/>Configure &<br/>generate environment"))
+  P3(("3.0<br/>Operate simulator<br/>(lifecycle, time, scenarios)"))
+  P4(("4.0<br/>Analyse<br/>(security, cost, network, IAM)"))
+  P5(("5.0<br/>Remediate<br/>& verify"))
+  P6(("6.0<br/>What-if<br/>simulation"))
+  P7(("7.0<br/>Audit, drift<br/>& reports"))
+
+  D1[("D1 users")]
+  D2[("D2 sim_environments<br/>sim_resources<br/>sim_relationships")]
+  D3[("D3 sim_metrics<br/>sim_cost_daily")]
+  D4[("D4 sim_scans, sim_findings<br/>sim_recommendations")]
+  D5[("D5 sim_remediations<br/>sim_whatif_runs<br/>sim_scenario_executions")]
+  D6[("D6 sim_audit_events")]
+  D7[("D7 sim_reports<br/>sim_saved_configs")]
+
+  USER -->|"email, password"| P1
+  P1 <-->|"hash check, role"| D1
+  P1 -->|"JWT"| USER
+
+  USER -->|"configuration + seed"| P2
+  P2 -->|"resources, relationships"| D2
+  P2 -->|"back-filled history"| D3
+  P2 -->|"initial scan"| P4
+
+  USER -->|"operations, advance days, scenario"| P3
+  P3 <-->|"read / write state"| D2
+  P3 -->|"daily metrics + costs"| D3
+  P3 --> D5
+
+  USER -->|"scan request"| P4
+  D2 -->|"configuration"| P4
+  D3 -->|"utilisation + billing"| P4
+  P4 -->|"findings, recommendations"| D4
+  P4 -->|"results"| USER
+
+  USER -->|"choose item, confirm"| P5
+  D4 -->|"plan"| P5
+  P5 -->|"validated operations"| D2
+  P5 -->|"re-scan"| P4
+  P5 -->|"remediation record"| D5
+
+  USER -->|"changes"| P6
+  D2 -->|"copy of state"| P6
+  P6 -->|"comparison"| USER
+  P6 --> D5
+
+  P2 & P3 & P4 & P5 & P6 -->|"events"| P7
+  P7 -->|"append"| D6
+  D4 & D5 & D6 -->|"history"| P7
+  P7 -->|"report"| D7
+  P7 -->|"audit log, drift, report files"| USER
