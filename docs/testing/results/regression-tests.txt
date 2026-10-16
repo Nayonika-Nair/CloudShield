@@ -39,6 +39,6 @@ tests/test_regression_legacy.py::test_schema_upgrade_adds_role_column_to_existin
     _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-======================== 25 passed, 1 warning in 6.56s ========================
+======================== 25 passed, 1 warning in 6.09s ========================
 
-[exit code 0, 10.6s]
+[exit code 0, 9.8s]

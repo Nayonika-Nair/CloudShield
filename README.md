@@ -108,7 +108,7 @@ Interactive docs at `/docs` (OpenAPI at `/openapi.json`). Main groups under `/ap
 
 ```bash
 cd backend
-python -m pytest tests -q                           # 340+ tests (SQLite by default)
+python -m pytest tests -q                           # 410+ tests (SQLite by default)
 TEST_DATABASE_URL=postgresql://... python -m pytest tests -q    # same suite on PostgreSQL
 python -m pytest tests --cov=app --cov-report=term
 python ../scripts/run_mutation.py --jobs 4 security cost billing iam config   # Cosmic Ray mutation testing

@@ -5,9 +5,10 @@ import subprocess
 from datetime import date
 from pathlib import Path
 
+from reportlab.lib.units import mm
 from report_lib import (
-    BODY, CELL, REPO, ROOT, PageBreak, Report, Spacer, TITLE, SUB, SMALL, bullets, code, coverage_total, fig, h1, h2, h3, junit_cases,
-    load_register, mutation_rows, p, table, toc,
+    BODY, CELL, REPO, ROOT, CondPageBreak, PageBreak, Report, Spacer, TITLE, SUB, SMALL, bullets, code, coverage_total, fig, h1, h2, h3, junit_cases,
+    load_register, mutation_rows, mutation_totals, p, table, toc,
 )
 
 OUT = ROOT / "docs" / "reports" / "CloudShield_Digital_Assignment_3_Evidence.pdf"
@@ -77,7 +78,7 @@ def main():
     s += [fig(doc, "docs/diagrams/rendered/12-simulator-workflow.png", "<b>Simulator workflow.</b> The ten stages and the modules that implement them.", width_mm=172)]
 
     # ---------------------------------------------------------------- 2 integration
-    s += [PageBreak(), h1("2. Integration testing evidence")]
+    s += [CondPageBreak(95 * mm), h1("2. Integration testing evidence")]
     ig = by_module.get("test_integration_db", []) + by_module.get("test_e2e_workflow", [])
     s += [p(f"Integration tests exercise the real database and the real HTTP stack together. They cover simulator &harr; database round trips "
             f"(resources, relationships, metrics and costs reload to an identical fingerprint), append-only history, optimistic locking against concurrent writers, "
@@ -91,7 +92,7 @@ def main():
     s += [shot(doc, "docs/screenshots/testing/frontend-contract-tests.png", max_h_mm=120)]
 
     # ---------------------------------------------------------------- 3 regression
-    s += [PageBreak(), h1("3. Regression testing evidence")]
+    s += [CondPageBreak(95 * mm), h1("3. Regression testing evidence")]
     rg = by_module.get("test_regression_legacy", [])
     s += [p(f"The original CloudShield code (registration/login, the mock cloud provider, the label-based security, cost and recommendation engines, the original "
             f"<font name='Courier'>/api/*</font> routes and their persistence) was kept and is pinned by regression tests that assert its previously observable behaviour: "
@@ -101,19 +102,19 @@ def main():
     s += [shot(doc, "docs/screenshots/testing/regression-tests.png", max_h_mm=235)]
 
     # ---------------------------------------------------------------- 4 mutation
-    s += [PageBreak(), h1("4. Mutation testing evidence")]
+    s += [CondPageBreak(95 * mm), h1("4. Mutation testing evidence")]
     if mut:
-        tot_c = sum(m["complete"] for m in mut)
-        tot_k = sum(m["killed"] for m in mut)
-        s += [p("Tool: <b>Cosmic Ray 8.4.1</b> (Python mutation testing). Each target module is mutated in its own copy of the backend so runs cannot contaminate each other; "
-                "every mutant is tested with the module's targeted pytest files using <font name='Courier'>pytest -x</font>. Two honest adjustments were made: "
-                "(1) a <b>seeded random sample</b> of mutants per module was run (seed 2026) because exhaustive runs cost about 15 s per mutant on the development machine, and "
-                "(2) mutants that fall inside <b>type annotations</b> were excluded, because they either crash at import (a trivially 'killed' mutant) or have no runtime effect.")]
-        rows = [[m["module"], m["label"], m["generated"], m["annotation_excluded"], m["complete"], m["killed"], m["survived"], f"{m['score_pct']}%"] for m in mut]
-        rows.append(["<b>All</b>", "", sum(m["generated"] for m in mut), sum(m["annotation_excluded"] for m in mut), tot_c, tot_k, sum(m["survived"] for m in mut),
-                     f"{round(tot_k / tot_c * 100, 1)}%" if tot_c else "n/a"])
-        s += table(doc, ["Module", "Covers", "Generated", "Annotation (excluded)", "Tested", "Killed", "Survived", "Score"], rows, [38, 52, 15, 18, 13, 12, 12, 12],
-                   caption="Mutation testing results exactly as recorded by scripts/run_mutation.py (docs/testing/mutation/*.json).")
+        t = mutation_totals(mut)
+        s += [p("Tool: <b>Cosmic Ray 8.4.1</b> (Python mutation testing). Each target module is mutated in its own copy of the backend so runs cannot contaminate each other. "
+                "Honest adjustments: (1) a <b>seeded random sample</b> of mutants per module was run (seed 2026) because an exhaustive run costs several seconds per mutant on the development machine, and "
+                "(2) mutants inside <b>type annotations</b> were excluded, because they either crash at import (a trivially 'killed' mutant) or have no runtime effect. "
+                "<b>Round 1</b> used the module's targeted pytest files and scored " + f"{t['score_round1']}%" + ". The survivors were then read, boundary and exactness tests "
+                "were written for them (<font name='Courier'>test_hardening_*.py</font>), and <b>round 2</b> re-ran only those survivors against the original plus the hardening tests; "
+                "kills from round 1 were kept unchanged. A kill counts only if the recorded output shows a failing test.")]
+        rows = [[m["module"], m["label"], m["generated"], m["annotation_excluded"], m["complete"], m["killed"], m["survived"], f"{m['round1']['score_pct']}%", f"{m['score_pct']}%"] for m in mut]
+        rows.append(["<b>All</b>", "", t["generated"], t["annotation"], t["tested"], t["killed"], t["survived"], f"{t['score_round1']}%", f"{t['score']}%"])
+        s += table(doc, ["Module", "Covers", "Generated", "Annotation (excluded)", "Tested", "Killed", "Survived", "Round 1", "Final"], rows, [32, 44, 14, 17, 12, 11, 12, 13, 13],
+                   caption="Mutation testing results exactly as recorded by scripts/run_mutation.py (docs/testing/mutation/*.json; round 1 in docs/testing/mutation-round1). Score = killed / (killed + survived); incompetent mutants are excluded.")
         surv = [m for m in mut if m["survived"]]
         s += [p("<b>Surviving mutants.</b> " + (
             "; ".join(f"{m['module']}: {m['survived']}" for m in surv) + ". Their diffs are stored in docs/testing/mutation/&lt;module&gt;.survivors.txt and discussed in the project report."
@@ -121,12 +122,12 @@ def main():
         s += [shot(doc, "docs/screenshots/testing/mutation-summary.png", max_h_mm=120)]
         s += [p("<b>Interpretation and limits.</b> The score applies only to the sampled mutants of the listed modules, not to the whole code base. A killed mutant means at least one "
                 "test failed; it does not by itself prove that the failure is meaningful. Lifecycle validation (lifecycle.py) is covered by unit tests but was not mutation-tested "
-                "because of its size.", SMALL)]
+                "because of its size. Some survivors are probably equivalent mutants (a change with no observable behaviour) and cannot be killed.", SMALL)]
     else:
         s += [p("Mutation testing results were not available when this report was built.")]
 
     # ---------------------------------------------------------------- 5 version mgmt
-    s += [PageBreak(), h1("5. Version management evidence")]
+    s += [CondPageBreak(95 * mm), h1("5. Version management evidence")]
     s += [p(f"Repository: <font name='Courier'>{REPO}</font>. Work followed the project's GitHub-Flow with a <font name='Courier'>develop</font> integration branch: "
             "feature branches (<font name='Courier'>feature/simulator-core</font>, <font name='Courier'>feature/frontend-integration</font>, <font name='Courier'>feature/documentation-evidence</font>) "
             "are merged with <font name='Courier'>--no-ff</font>, commits are small and describe what changed, and the commits made for this work carry the co-author trailer. "
@@ -137,7 +138,7 @@ def main():
     s += [shot(doc, "docs/screenshots/version-management/git-status-remote.png", max_h_mm=100)]
 
     # ---------------------------------------------------------------- 6 system building
-    s += [PageBreak(), h1("6. System building evidence")]
+    s += [CondPageBreak(95 * mm), h1("6. System building evidence")]
     s += [h2("6.1 Container set-up (written; image build not executed)")]
     s += [p("The repository provides <font name='Courier'>docker-compose.yml</font> (PostgreSQL 16 with a named volume and <font name='Courier'>pg_isready</font> health check, "
             "the FastAPI backend with a health check and non-root user, and an nginx frontend that serves the static UI and proxies <font name='Courier'>/api</font>), "
@@ -156,7 +157,7 @@ def main():
     s += [shot(doc, "docs/screenshots/testing/full-suite-postgres.png", max_h_mm=110)]
 
     # ---------------------------------------------------------------- 7 screenshots
-    s += [PageBreak(), h1("7. Screenshots of the developed functionality")]
+    s += [CondPageBreak(95 * mm), h1("7. Screenshots of the developed functionality")]
     s += [h2("7.1 Demonstration walkthrough")]
     s += [p("All screenshots in this section were produced by <font name='Courier'>scripts/ui_walkthrough.py</font>, which drives the real application in Chrome with Playwright against the "
             "FastAPI + PostgreSQL stack, asserts what it sees (for example that a world-open rule exists before remediation and is gone afterwards) and fails if the browser logs any error. "
@@ -189,7 +190,7 @@ def main():
                 tall = n.startswith(("security/04", "security/05", "security/06", "security/09", "simulator/07", "simulator/15", "cost/05", "cost/06"))
                 s += [shot(doc, rel, width_mm=150 if tall else 170, max_h_mm=215 if tall else 190)]
     # ---------------------------------------------------------------- 8 tools
-    s += [PageBreak(), h1("8. Tools and technologies used")]
+    s += [CondPageBreak(95 * mm), h1("8. Tools and technologies used")]
     s += table(doc, ["Area", "Technology", "Used for"], [
         ["Backend", "Python 3.11, FastAPI 0.115, Uvicorn, Pydantic 2", "REST API, validation, OpenAPI documentation"],
         ["Persistence", "PostgreSQL 16, SQLAlchemy 2, psycopg2", "Users and all simulator state / history (JSONB columns)"],
@@ -252,7 +253,7 @@ def main():
             f"metrics and 'AWS' resources are simulated.")]
 
     # ---------------------------------------------------------------- appendix
-    s += [PageBreak(), h1("Appendix A. Evidence register")]
+    s += [CondPageBreak(95 * mm), h1("Appendix A. Evidence register")]
     rows = [[e["file"].replace("docs/screenshots/", ""), e["title"], e["purpose"]] for e in sorted(REG.values(), key=lambda e: e["file"])]
     s += table(doc, ["File (docs/screenshots/)", "Shows", "Demonstrates"], rows, [44, 46, 80], caption="Every screenshot used in this report with its purpose.")
     doc.multiBuild(s)

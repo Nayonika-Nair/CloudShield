@@ -13,6 +13,7 @@ from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
+from reportlab.platypus import CondPageBreak
 from reportlab.platypus import (
     BaseDocTemplate, Frame, Image, KeepTogether, PageBreak, PageTemplate, Paragraph, Preformatted, Spacer, Table,
     TableStyle,
@@ -72,8 +73,7 @@ class Report(BaseDocTemplate):
     def afterFlowable(self, flowable):
         if isinstance(flowable, Paragraph) and flowable.style.name in ("h1", "h2"):
             level = 0 if flowable.style.name == "h1" else 1
-            self._key += 1
-            key = f"s{self._key}"
+            key = "sec-" + re.sub(r"[^a-z0-9]+", "-", flowable.getPlainText().lower()).strip("-")[:60]   # stable across passes
             self.canv.bookmarkPage(key)
             self.canv.addOutlineEntry(flowable.getPlainText(), key, level=level, closed=level > 0)
             self.notify("TOCEntry", (level, flowable.getPlainText(), self.page, key))
@@ -211,7 +211,20 @@ def coverage_total(result_txt: Path) -> tuple[str, dict[str, str]]:
 
 def mutation_rows() -> list[dict]:
     d = ROOT / "docs" / "testing" / "mutation"
-    return [json.loads(f.read_text(encoding="utf-8")) for f in sorted(d.glob("*.json")) if f.name != "summary.json"]
+    rows = [json.loads(f.read_text(encoding="utf-8")) for f in sorted(d.glob("*.json")) if f.name != "summary.json"]
+    for m in rows:
+        m["killed"] = m.get("killed_with_failing_test_output", m["killed"])      # only kills that recorded a failing test count
+        m.setdefault("complete", m["killed"] + m["survived"] + m["incompetent"])
+        m.setdefault("round1", {"score_pct": m["score_pct"]})
+    return rows
+
+
+def mutation_totals(mut: list[dict]) -> dict:
+    k, sv = sum(m["killed"] for m in mut), sum(m["survived"] for m in mut)
+    k1, s1 = sum(m["round1"].get("killed", 0) for m in mut), sum(m["round1"].get("survived", 0) for m in mut)
+    return {"killed": k, "survived": sv, "tested": sum(m["complete"] for m in mut), "incompetent": sum(m["incompetent"] for m in mut),
+            "score": round(k / (k + sv) * 100, 1) if k + sv else None, "score_round1": round(k1 / (k1 + s1) * 100, 1) if k1 + s1 else None,
+            "generated": sum(m.get("generated", 0) for m in mut), "annotation": sum(m.get("annotation_excluded", 0) for m in mut)}
 
 
 __all__ = [n for n in dir() if not n.startswith("_")] + ["PageBreak", "Spacer", "KeepTogether"]

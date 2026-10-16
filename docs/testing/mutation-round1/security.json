@@ -1,0 +1,20 @@
+{
+  "name": "security",
+  "label": "Security detection rules and severity logic",
+  "module": "app/engines/security.py",
+  "tests": "tests/test_security_rules.py",
+  "total": 100,
+  "complete": 100,
+  "generated": 729,
+  "annotation_excluded": 66,
+  "sampled": 100,
+  "seed": 2026,
+  "survived": 31,
+  "killed": 69,
+  "killed_with_failing_test_output": 69,
+  "incompetent": 0,
+  "baseline_passed": true,
+  "score_pct": 69.0,
+  "seconds": 590,
+  "exec_returncode": 0
+}

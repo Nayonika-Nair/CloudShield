@@ -8,6 +8,6 @@ $ python -m pytest tests/test_frontend_contract.py -q -p no:cacheprovider
     _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-66 passed, 1 warning in 0.22s
+66 passed, 1 warning in 0.20s
 
-[exit code 0, 4.2s]
+[exit code 0, 3.8s]

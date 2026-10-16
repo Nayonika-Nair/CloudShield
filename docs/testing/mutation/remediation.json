@@ -1,0 +1,29 @@
+{
+  "name": "remediation",
+  "label": "Remediation execution and plan hashing",
+  "module": "app/engines/remediation.py",
+  "total": 17,
+  "generated": 17,
+  "annotation_excluded": 0,
+  "sampled": 17,
+  "seed": 2026,
+  "tests_round1": "tests/test_whatif_drift.py",
+  "tests_round2": "tests/test_whatif_drift.py tests/test_hardening_config_billing.py tests/test_hardening_engines.py",
+  "baseline_passed": true,
+  "round1": {
+    "killed": 10,
+    "survived": 6,
+    "incompetent": 1,
+    "score_pct": 62.5
+  },
+  "killed": 16,
+  "killed_with_failing_test_output": 16,
+  "survived": 0,
+  "incompetent": 1,
+  "newly_killed_in_round2": 6,
+  "score_pct": 100.0,
+  "pending": 0,
+  "seconds_round2": 62,
+  "exec_returncode": 0,
+  "newly_incompetent_in_round2": 0
+}

@@ -2,7 +2,7 @@
   {
     "file": "docs/screenshots/testing/unit-tests.png",
     "category": "testing",
-    "title": "Unit tests: generator, lifecycle, network, IAM, rules, cost, time, what-if",
+    "title": "Unit tests: generator, lifecycle, network, IAM, rules, cost, time, what-if, boundary hardening",
     "purpose": "Unit-test evidence: seed reproducibility, lifecycle validation, reachability, IAM evaluation, detection rules, cost arithmetic, anomaly detection, what-if isolation.",
     "source_output": "docs/testing/results/unit-tests.txt",
     "rc": 0,
@@ -59,6 +59,15 @@
     "title": "Full suite on PostgreSQL 16",
     "purpose": "The same suite executed against a real PostgreSQL 16 server (TEST_DATABASE_URL).",
     "source_output": "docs/testing/results/full-suite-postgres.txt",
+    "rc": 0,
+    "expected_rc": 0
+  },
+  {
+    "file": "docs/screenshots/testing/mutation-summary.png",
+    "category": "testing",
+    "title": "Mutation testing summary (Cosmic Ray, two rounds)",
+    "purpose": "Mutation-testing evidence: per-module killed/survived counts, round 1 (targeted tests) and final (after hardening tests).",
+    "source_output": "docs/testing/results/mutation-summary.txt",
     "rc": 0,
     "expected_rc": 0
   }

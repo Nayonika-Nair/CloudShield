@@ -1,0 +1,29 @@
+{
+  "name": "iam",
+  "label": "IAM evaluation, trust and escalation",
+  "module": "app/engines/iam.py",
+  "total": 100,
+  "generated": 353,
+  "annotation_excluded": 22,
+  "sampled": 100,
+  "seed": 2026,
+  "tests_round1": "tests/test_network_iam.py tests/test_security_rules.py",
+  "tests_round2": "tests/test_network_iam.py tests/test_security_rules.py tests/test_hardening_config_billing.py tests/test_hardening_engines.py",
+  "baseline_passed": true,
+  "round1": {
+    "killed": 63,
+    "survived": 37,
+    "incompetent": 0,
+    "score_pct": 63.0
+  },
+  "killed": 77,
+  "killed_with_failing_test_output": 77,
+  "survived": 23,
+  "incompetent": 0,
+  "newly_killed_in_round2": 14,
+  "score_pct": 77.0,
+  "pending": 0,
+  "seconds_round2": 373,
+  "exec_returncode": 0,
+  "newly_incompetent_in_round2": 0
+}

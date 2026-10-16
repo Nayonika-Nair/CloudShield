@@ -1,0 +1,29 @@
+{
+  "name": "optimization",
+  "label": "Cost recommendation rules",
+  "module": "app/engines/optimization.py",
+  "total": 100,
+  "generated": 937,
+  "annotation_excluded": 66,
+  "sampled": 100,
+  "seed": 2026,
+  "tests_round1": "tests/test_cost_time.py tests/test_whatif_drift.py",
+  "tests_round2": "tests/test_cost_time.py tests/test_whatif_drift.py tests/test_hardening_config_billing.py tests/test_hardening_engines.py",
+  "baseline_passed": true,
+  "round1": {
+    "killed": 54,
+    "survived": 39,
+    "incompetent": 7,
+    "score_pct": 58.1
+  },
+  "killed": 80,
+  "killed_with_failing_test_output": 80,
+  "survived": 8,
+  "incompetent": 12,
+  "newly_killed_in_round2": 26,
+  "score_pct": 90.9,
+  "pending": 0,
+  "seconds_round2": 492,
+  "exec_returncode": 0,
+  "newly_incompetent_in_round2": 5
+}

@@ -1,0 +1,20 @@
+{
+  "name": "iam",
+  "label": "IAM evaluation, trust and escalation",
+  "module": "app/engines/iam.py",
+  "tests": "tests/test_network_iam.py tests/test_security_rules.py",
+  "total": 100,
+  "complete": 100,
+  "generated": 353,
+  "annotation_excluded": 22,
+  "sampled": 100,
+  "seed": 2026,
+  "survived": 37,
+  "killed": 63,
+  "killed_with_failing_test_output": 63,
+  "incompetent": 0,
+  "baseline_passed": true,
+  "score_pct": 63.0,
+  "seconds": 639,
+  "exec_returncode": 0
+}

@@ -1,0 +1,29 @@
+{
+  "name": "config",
+  "label": "Configuration validation logic",
+  "module": "app/simulator/config.py",
+  "total": 100,
+  "generated": 690,
+  "annotation_excluded": 11,
+  "sampled": 100,
+  "seed": 2026,
+  "tests_round1": "tests/test_generator_config.py",
+  "tests_round2": "tests/test_generator_config.py tests/test_hardening_config_billing.py tests/test_hardening_engines.py",
+  "baseline_passed": true,
+  "round1": {
+    "killed": 53,
+    "survived": 47,
+    "incompetent": 0,
+    "score_pct": 53.0
+  },
+  "killed": 78,
+  "killed_with_failing_test_output": 78,
+  "survived": 22,
+  "incompetent": 0,
+  "newly_killed_in_round2": 25,
+  "score_pct": 78.0,
+  "pending": 0,
+  "seconds_round2": 333,
+  "exec_returncode": 0,
+  "newly_incompetent_in_round2": 0
+}

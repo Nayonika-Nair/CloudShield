@@ -1,0 +1,29 @@
+{
+  "name": "cost",
+  "label": "Cost run-rate, history and anomaly detection",
+  "module": "app/engines/cost.py",
+  "total": 100,
+  "generated": 402,
+  "annotation_excluded": 0,
+  "sampled": 100,
+  "seed": 2026,
+  "tests_round1": "tests/test_cost_time.py",
+  "tests_round2": "tests/test_cost_time.py tests/test_hardening_config_billing.py tests/test_hardening_engines.py",
+  "baseline_passed": true,
+  "round1": {
+    "killed": 55,
+    "survived": 39,
+    "incompetent": 6,
+    "score_pct": 58.5
+  },
+  "killed": 79,
+  "killed_with_failing_test_output": 79,
+  "survived": 15,
+  "incompetent": 6,
+  "newly_killed_in_round2": 24,
+  "score_pct": 84.0,
+  "pending": 0,
+  "seconds_round2": 318,
+  "exec_returncode": 0,
+  "newly_incompetent_in_round2": 0
+}

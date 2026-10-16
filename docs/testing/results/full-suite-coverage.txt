@@ -1,11 +1,12 @@
 $ python -m pytest tests -q -p no:cacheprovider --cov=app --cov-report=term --junitxml=../docs/testing/results/junit-sqlite.xml
 (cwd: backend)
 
-........................................................................ [ 20%]
-........................................................................ [ 41%]
-........................................................................ [ 62%]
-........................................................................ [ 83%]
-........................................................                 [100%]
+........................................................................ [ 17%]
+........................................................................ [ 34%]
+........................................................................ [ 52%]
+........................................................................ [ 69%]
+........................................................................ [ 87%]
+....................................................                     [100%]
 ============================== warnings summary ===============================
 ..\.venv\Lib\site-packages\starlette\testclient.py:40
   C:\Users\bhuva\Downloads\abhinav_github\CloudShield-src\CloudShield\.venv\Lib\site-packages\starlette\testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
@@ -23,13 +24,13 @@ app\database.py                     13      0   100%
 app\engines\__init__.py              0      0   100%
 app\engines\analysis.py             12      0   100%
 app\engines\compliance.py           23      0   100%
-app\engines\cost.py                 94      1    99%
+app\engines\cost.py                 94      0   100%
 app\engines\drift.py                41      1    98%
-app\engines\iam.py                 149      1    99%
-app\engines\network.py             194     13    93%
-app\engines\optimization.py        144      4    97%
+app\engines\iam.py                 149      0   100%
+app\engines\network.py             194      5    97%
+app\engines\optimization.py        144      3    98%
 app\engines\remediation.py          34      0   100%
-app\engines\security.py            197      2    99%
+app\engines\security.py            197      0   100%
 app\engines\whatif.py               39      0   100%
 app\main.py                         99     33    67%
 app\models.py                       72      0   100%
@@ -56,15 +57,15 @@ app\simulator\__init__.py            0      0   100%
 app\simulator\billing.py            36      0   100%
 app\simulator\builders.py           77      6    92%
 app\simulator\catalog.py            14      0   100%
-app\simulator\config.py            191      9    95%
+app\simulator\config.py            191      0   100%
 app\simulator\env.py               210      4    98%
 app\simulator\generator.py         305      3    99%
 app\simulator\lifecycle.py         675     81    88%
 app\simulator\scenarios.py         173     19    89%
 app\simulator\timeengine.py        156      7    96%
 ----------------------------------------------------
-TOTAL                             4626    231    95%
+TOTAL                             4626    209    95%
 
-344 passed, 1 warning in 110.35s (0:01:50)
+412 passed, 1 warning in 114.14s (0:01:54)
 
-[exit code 0, 116.6s]
+[exit code 0, 119.6s]

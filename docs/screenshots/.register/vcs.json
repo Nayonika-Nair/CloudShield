@@ -1,0 +1,29 @@
+[
+  {
+    "file": "docs/screenshots/version-management/git-branches.png",
+    "category": "version-management",
+    "title": "Git branches",
+    "purpose": "Branches used by the GitHub-Flow workflow (main, develop, feature branches).",
+    "source_output": "docs/testing/results/git-branches.txt",
+    "rc": 0,
+    "expected_rc": 0
+  },
+  {
+    "file": "docs/screenshots/version-management/git-graph.png",
+    "category": "version-management",
+    "title": "Git history graph",
+    "purpose": "Meaningful commits and --no-ff merges of feature branches into develop.",
+    "source_output": "docs/testing/results/git-graph.txt",
+    "rc": 0,
+    "expected_rc": 0
+  },
+  {
+    "file": "docs/screenshots/version-management/git-status-remote.png",
+    "category": "version-management",
+    "title": "Repository, remote and working-tree state",
+    "purpose": "Remote URL and clean working tree after the commits (nothing is pushed by the tooling).",
+    "source_output": "docs/testing/results/git-status-remote.txt",
+    "rc": 0,
+    "expected_rc": 0
+  }
+]

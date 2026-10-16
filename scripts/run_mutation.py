@@ -93,7 +93,7 @@ def run_one(name: str, sample: int | None = None, seed: int = 2026) -> dict:
     toml = backend / "cosmic-ray.toml"
     toml.write_text(
         f'[cosmic-ray]\nmodule-path = "{module}"\ntimeout = 90.0\nexcluded-modules = []\n'
-        f'test-command = "python -m pytest -x -q -p no:cacheprovider {tests}"\n\n[cosmic-ray.distributor]\nname = "local"\n',
+        f'test-command = "{PYTHON} cr_test.py {tests}"\n\n[cosmic-ray.distributor]\nname = "local"\n',
         encoding="utf-8")
     env = dict(os.environ, PATH=f"{VENV_BIN};{os.environ['PATH']}")
     session = backend / "session.sqlite"
@@ -132,14 +132,69 @@ def run_one(name: str, sample: int | None = None, seed: int = 2026) -> dict:
     return result
 
 
+HARDENING = "tests/test_hardening_config_billing.py tests/test_hardening_engines.py"
+
+
+def run_round2(name: str) -> dict:
+    """Round 2: keep round 1's mutants and results, re-queue only the SURVIVED ones, run them against the module's original tests
+    plus the hardening tests that were written after reading the round-1 survivors. Killed/incompetent results are kept as they were."""
+    import shlex
+    module, tests, label = TARGETS[name]
+    backend = WORK / name / "backend"
+    session = backend / "session.sqlite"
+    if not session.exists():
+        return {"name": name, "error": "round-1 session not found"}
+    shutil.rmtree(backend / "tests", ignore_errors=True)
+    shutil.copytree(ROOT / "backend" / "tests", backend / "tests", ignore=shutil.ignore_patterns("__pycache__"))
+    tests2 = f"{tests} {HARDENING}"
+    toml = backend / "cosmic-ray.toml"
+    text = toml.read_text(encoding="utf-8")
+    text = re.sub(r'test-command = ".*"', f'test-command = "{PYTHON} cr_test.py {tests2}"', text)
+    toml.write_text(text, encoding="utf-8")
+    env = dict(os.environ, PATH=f"{VENV_BIN};{os.environ['PATH']}")
+    base = subprocess.run(shlex.split(f"{PYTHON} cr_test.py {tests2}"), cwd=backend, capture_output=True, env=dict(env, PYTHONDONTWRITEBYTECODE="1"))
+    if base.returncode != 0:
+        return {"name": name, "error": "baseline failed: " + base.stdout.decode()[-300:]}
+    db = sqlite3.connect(session)
+    before = dict(db.execute("select test_outcome, count(*) from work_results group by 1").fetchall())
+    db.execute("delete from work_results where test_outcome='SURVIVED'")
+    db.commit()
+    db.close()
+    start = time.time()
+    execp = sh("cosmic-ray exec cosmic-ray.toml session.sqlite", backend, env)
+    survivors = sh("cr-report session.sqlite --surviving-only --show-diff", backend, env).stdout
+    report = sh("cr-report session.sqlite --show-pending", backend, env).stdout
+    db = sqlite3.connect(session)
+    counts = dict(db.execute("select test_outcome, count(*) from work_results group by 1").fetchall())
+    genuine = db.execute("select count(*) from work_results where test_outcome='KILLED' and (output like '%FAILED %' or output like '%Error%' or output='timeout')").fetchone()[0]
+    db.close()
+    killed, survived, incompetent = counts.get("KILLED", 0), counts.get("SURVIVED", 0), counts.get("INCOMPETENT", 0)
+    round1 = json.loads((OUT.parent / "mutation-round1" / f"{name}.json").read_text(encoding="utf-8"))
+    (OUT / f"{name}.survivors.txt").write_text(survivors, encoding="utf-8")
+    result = {
+        **{k: round1[k] for k in ("name", "label", "module", "total", "generated", "annotation_excluded", "sampled", "seed")},
+        "tests_round1": tests, "tests_round2": tests2, "baseline_passed": True,
+        "round1": {"killed": round1["killed"], "survived": round1["survived"], "incompetent": round1["incompetent"], "score_pct": round1["score_pct"]},
+        "killed": killed, "killed_with_failing_test_output": genuine, "survived": survived, "incompetent": incompetent,
+        "newly_killed_in_round2": genuine - round1["killed"], "newly_incompetent_in_round2": incompetent - round1["incompetent"],
+        "score_pct": round(genuine / (genuine + survived) * 100, 1) if (genuine + survived) else None,
+        "pending": int(re.search(r"total jobs: (\d+)", report).group(1)) - sum(counts.values()) if re.search(r"total jobs: (\d+)", report) else None,
+        "seconds_round2": round(time.time() - start), "exec_returncode": execp.returncode,
+    }
+    (OUT / f"{name}.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    print(json.dumps(result), flush=True)
+    return result
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("targets", nargs="+", choices=sorted(TARGETS))
     ap.add_argument("--jobs", type=int, default=3)
     ap.add_argument("--sample", type=int, default=None, help="random sample of N mutants per module (seeded)")
+    ap.add_argument("--round2", action="store_true", help="re-run only round-1 survivors against the hardened test set")
     args = ap.parse_args()
     with ThreadPoolExecutor(max_workers=args.jobs) as pool:
-        results = list(pool.map(lambda n: run_one(n, args.sample), args.targets))
+        results = list(pool.map((run_round2 if args.round2 else (lambda n: run_one(n, args.sample))), args.targets))
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "summary.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
     sys.exit(0)

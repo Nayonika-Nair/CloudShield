@@ -1,0 +1,20 @@
+{
+  "name": "remediation",
+  "label": "Remediation execution and plan hashing",
+  "module": "app/engines/remediation.py",
+  "tests": "tests/test_whatif_drift.py",
+  "total": 17,
+  "complete": 17,
+  "generated": 17,
+  "annotation_excluded": 0,
+  "sampled": 17,
+  "seed": 2026,
+  "survived": 6,
+  "killed": 10,
+  "killed_with_failing_test_output": 10,
+  "incompetent": 1,
+  "baseline_passed": true,
+  "score_pct": 62.5,
+  "seconds": 134,
+  "exec_returncode": 0
+}

@@ -9,9 +9,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 
+from reportlab.lib.units import mm  # noqa: E402
 from report_lib import (  # noqa: E402
-    BODY, CELL, REPO, ROOT, PageBreak, Report, SMALL, SUB, TITLE, Spacer, bullets, code, coverage_total, esc, excerpt, fig, h1, h2, h3,
-    junit_cases, load_register, mutation_rows, p, table, toc,
+    BODY, CELL, REPO, ROOT, CondPageBreak, PageBreak, Report, SMALL, SUB, TITLE, Spacer, bullets, code, coverage_total, esc, excerpt, fig, h1, h2, h3,
+    junit_cases, load_register, mutation_rows, mutation_totals, p, table, toc,
 )
 
 OUT = ROOT / "docs" / "reports" / "CloudShield_Project_Report.pdf"
@@ -84,7 +85,7 @@ def main():
             "not built on the development machine (Docker is not installed there); mutation testing used a seeded sample of mutants.")]
 
     # ---------------------------------------------------------------- 2
-    s += [PageBreak(), h1("2. Requirements and user stories")]
+    s += [CondPageBreak(95 * mm), h1("2. Requirements and user stories")]
     s += [h2("2.1 Stakeholders")]
     s += table(doc, ["Stakeholder", "Role in CloudShield", "Main interest"], [
         ["Cloud administrator", "<b>admin</b> role", "Configure and generate environments, change state, advance time, run scenarios"],
@@ -122,7 +123,7 @@ def main():
         ["NFR-04 Auditability", "Every state change recorded and not editable", "Append-only sim_audit_events; no update/delete routes"],
         ["NFR-05 Usability", "Formal light UI, accessible contrast, keyboard operation, clear states", "Design tokens, focus styles, ARIA roles, text + colour badges"],
         ["NFR-06 Performance", "Interactive response for ~200 resources", "Typical API calls 20-100 ms (measured locally); bulk inserts; no N+1 queries"],
-        ["NFR-07 Maintainability", "Layered code, tests, documentation", "routers / services / engines / simulator split; 340+ tests; diagrams"],
+        ["NFR-07 Maintainability", "Layered code, tests, documentation", "routers / services / engines / simulator split; 410+ tests; diagrams"],
         ["NFR-08 Portability", "Run with Docker or natively; configurable API base", "Compose files, .env.example, same-origin or configurable API base"],
         ["NFR-09 Honesty", "State limitations and never present estimates as results", "Estimated / simulated / verified labels; limitations in UI and reports"],
     ], [34, 62, 74], caption="Non-functional requirements.")
@@ -158,7 +159,7 @@ def main():
     ], [14, 100, 56], caption="Selected acceptance criteria and the tests that check them.")
 
     # ---------------------------------------------------------------- 3
-    s += [PageBreak(), h1("3. System architecture and design")]
+    s += [CondPageBreak(95 * mm), h1("3. System architecture and design")]
     s += [h2("3.1 Architecture")]
     s += [diagram(doc, "01-system-architecture", "<b>System architecture.</b> Browser, delivery layer, FastAPI layers and PostgreSQL. The simulator is a library used by the services; nothing connects to AWS.", width_mm=172)]
     s += [p("<b>Frontend</b> (vanilla ES modules) renders every number from API responses, keeps no business logic, and uses one delegated event system so that every control is declared and testable. "
@@ -210,7 +211,7 @@ def main():
             "Lists are paginated; mutating operations run in a transaction with optimistic locking on <font name='Courier'>state_version</font>.")]
 
     # ---------------------------------------------------------------- 4
-    s += [PageBreak(), h1("4. Implementation")]
+    s += [CondPageBreak(95 * mm), h1("4. Implementation")]
     s += [h2("4.1 Modules and responsibilities")]
     s += table(doc, ["Module", "Responsibility"], [
         ["simulator/config.py", "Pydantic configuration with presets, quotas, pricing, thresholds, scenario probabilities and cross-field validation"],
@@ -271,7 +272,7 @@ def main():
     s += [shot(doc, "docs/screenshots/application/03-dashboard.png", width_mm=160, max_h_mm=190)]
 
     # ---------------------------------------------------------------- 5
-    s += [PageBreak(), h1("5. Design of tests")]
+    s += [CondPageBreak(95 * mm), h1("5. Design of tests")]
     s += [h2("5.1 Strategy")]
     s += [p("Testing is layered so that each kind of fault is caught where it is cheapest to find: <b>unit</b> tests on pure engines with deterministic seeds; <b>integration</b> tests across simulator, engines and database; "
             "<b>API</b> tests for contracts, authorisation and state consistency; <b>regression</b> tests that pin the original behaviour; <b>frontend contract</b> tests; one <b>end-to-end</b> workflow; "
@@ -317,13 +318,14 @@ def main():
     s += table(doc, ["ID", "Input / action", "Expected outcome", "Actual", "Automated test"], tcs, [12, 46, 52, 14, 46], caption="Representative test cases with expected and actual outcomes (all executed; the full list is in Appendix F).")
     s += [h2("5.3 Mutation testing")]
     if mut:
-        tot_c = sum(m["complete"] for m in mut)
-        tot_k = sum(m["killed"] for m in mut)
-        rows = [[m["module"], m["label"], m["complete"], m["killed"], m["survived"], f"{m['score_pct']}%"] for m in mut]
-        rows.append(["<b>All</b>", "", tot_c, tot_k, sum(m["survived"] for m in mut), f"{round(tot_k / tot_c * 100, 1)}%"])
+        t = mutation_totals(mut)
+        rows = [[m["module"], m["label"], m["complete"], m["killed"], m["survived"], f"{m['round1']['score_pct']}%", f"{m['score_pct']}%"] for m in mut]
+        rows.append(["<b>All</b>", "", t["tested"], t["killed"], t["survived"], f"{t['score_round1']}%", f"{t['score']}%"])
         s += [p("Cosmic Ray 8.4.1 was run on eight modules that hold the security rules, cost calculation, IAM logic, network reachability, configuration validation, recommendations and remediation. "
-                "A seeded random sample of up to 120 mutants per module was tested (annotation-only mutants excluded because they either crash at import or change nothing at runtime).")]
-        s += table(doc, ["Module", "Covers", "Tested", "Killed", "Survived", "Score"], rows, [46, 62, 14, 14, 16, 18], caption="Mutation results (docs/testing/mutation).")
+                "A seeded random sample of up to 100 mutants per module was tested (annotation-only mutants excluded because they either crash at import or change nothing at runtime). "
+                f"Round 1 used the module's targeted tests and scored {t['score_round1']}%. The surviving mutants were then analysed and boundary/exactness tests were added "
+                f"(test_hardening_config_billing.py, test_hardening_engines.py); round 2 re-ran only the survivors against them, giving {t['score']}% overall.")]
+        s += table(doc, ["Module", "Covers", "Tested", "Killed", "Survived", "Round 1", "Final"], rows, [40, 52, 14, 14, 16, 17, 17], caption="Mutation results (docs/testing/mutation; round 1 in docs/testing/mutation-round1). Score = killed / (killed + survived).")
         surv = [m for m in mut if m["survived"]]
         s += [p(("Surviving mutants are listed with their diffs in docs/testing/mutation/*.survivors.txt. " if surv else "No sampled mutant survived. ") +
                 "A killed mutant means the suite failed after the code was altered; it does not prove every behaviour is tested, and unsampled mutants were not run. Equivalent mutants (changes with no observable effect) would appear as survivors and are not hidden.")]
@@ -340,7 +342,7 @@ def main():
     ])
 
     # ---------------------------------------------------------------- 6
-    s += [PageBreak(), h1("6. Results and demonstration")]
+    s += [CondPageBreak(95 * mm), h1("6. Results and demonstration")]
     s += [h2("6.1 Implemented features")]
     s += table(doc, ["Feature", "Status", "Evidence"], [
         ["Configurable seeded Fake AWS environment (16 resource types, quotas, presets, saved configs)", "Implemented", "Simulator screenshots, config and generator tests"],
@@ -385,7 +387,7 @@ def main():
             "exhaustive mutation testing in CI; a container-based CI pipeline that builds the images and runs the suite on PostgreSQL; role administration in the UI; and websocket-driven live updates for auto-advancing time.")]
 
     # ---------------------------------------------------------------- 8 appendix
-    s += [PageBreak(), h1("8. Appendix")]
+    s += [CondPageBreak(95 * mm), h1("8. Appendix")]
     s += [h2("Appendix A. Software Requirements Specification (summary)")]
     s += [p("<b>Purpose.</b> This SRS summarises the requirements of CloudShield v2.0 following the structure of IEEE 830. "
             "<b>Product perspective.</b> A web application (single-page UI + REST API + PostgreSQL) that analyses a simulated AWS account. "
