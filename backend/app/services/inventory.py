@@ -41,6 +41,10 @@ def summarize(res: dict[str, Any], monthly: float | None = None) -> dict[str, An
     return out
 
 
+TYPE_ORDER = ["ec2_instance", "rds_instance", "s3_bucket", "load_balancer", "ebs_volume", "elastic_ip", "vpc", "subnet",
+              "security_group", "route_table", "internet_gateway", "network_interface", "iam_user", "iam_role", "iam_policy", "snapshot"]
+
+
 def listing(env: Environment, *, rtype: str | None, state: str | None, q: str | None) -> list[dict[str, Any]]:
     rate = cost.monthly_run_rate(env)["by_resource"]
     needle = (q or "").lower()
@@ -55,7 +59,7 @@ def listing(env: Environment, *, rtype: str | None, state: str | None, q: str | 
             if needle not in blob:
                 continue
         items.append(summarize(res, rate.get(res["id"], 0.0)))
-    return sorted(items, key=lambda r: (r["type"], r["name"]))
+    return sorted(items, key=lambda r: (TYPE_ORDER.index(r["type"]) if r["type"] in TYPE_ORDER else 99, r["name"]))
 
 
 def detail(env: Environment, rid: str) -> dict[str, Any]:

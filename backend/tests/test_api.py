@@ -207,7 +207,10 @@ def test_pricing_can_be_changed_but_structural_config_cannot(sim):
     r = c.patch("/api/sim/environment/config", headers=h, json={"pricing": {"ec2_hourly": {k: v * 2 for k, v in cfg.items()}}})
     assert r.status_code == 200
     assert c.get("/api/sim/costs/summary", headers=h).json()["monthly_run_rate"] > before
-    assert c.patch("/api/sim/environment/config", headers=h, json={"pricing": {"ec2_hourly": {"t3.micro": 1}}}).status_code == 422
+    assert c.patch("/api/sim/environment/config", headers=h, json={"pricing": {"ec2_hourly": {"t3.micro": -1}}}).status_code == 422
+    assert c.patch("/api/sim/environment/config", headers=h, json={"pricing": {"ec2_hourly": {"t3.micro": 0.5}}}).status_code == 200   # partial update merges
+    assert c.get("/api/sim/environment", headers=h).json()["config"]["pricing"]["ec2_hourly"]["t3.large"] > 0
+    assert c.patch("/api/sim/environment/config", headers=h, json={"counts": {"vpcs": 3}}).status_code == 422                     # structural change refused
     events = c.get("/api/sim/audit?action=CONFIG_CHANGED", headers=h).json()["items"]
     assert events and events[0]["before"] and events[0]["after"]
 

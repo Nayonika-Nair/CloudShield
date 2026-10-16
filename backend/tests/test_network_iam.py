@@ -247,3 +247,13 @@ def test_analysis_summary_counts(base_env):
     assert a["summary"]["admins"] == len(a["admin_principals"])
     ids = {n["id"] for n in a["graph"]["nodes"]}
     assert all(e["source"] in ids and e["target"] in ids for e in a["graph"]["edges"])
+
+
+def test_topology_marks_only_sensitive_world_rules_as_exposed_security_groups(clean_env):
+    topo = network.topology(clean_env)
+    web_sg = next(n for n in topo["nodes"] if n["type"] == "security_group" and n["label"].endswith("web-sg"))
+    assert web_sg["attrs"]["open_to_world"] and web_sg["exposed"] is False   # HTTP/HTTPS from anywhere is normal for a web tier
+    inst = public_instance(clean_env)
+    sg = open_ssh(clean_env, inst)
+    flagged = {n["id"] for n in network.topology(clean_env)["nodes"] if n["type"] == "security_group" and n["exposed"]}
+    assert flagged == {sg}
