@@ -1,0 +1,15 @@
+$ python -m pytest tests/test_generator_config.py tests/test_lifecycle.py tests/test_network_iam.py tests/test_security_rules.py tests/test_cost_time.py tests/test_whatif_drift.py -q -p no:cacheprovider
+(cwd: backend)
+
+........................................................................ [ 35%]
+........................................................................ [ 70%]
+.............................................................            [100%]
+============================== warnings summary ===============================
+..\.venv\Lib\site-packages\starlette\testclient.py:40
+  C:\Users\bhuva\Downloads\abhinav_github\CloudShield-src\CloudShield\.venv\Lib\site-packages\starlette\testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+205 passed, 1 warning in 12.38s
+
+[exit code 0, 16.7s]

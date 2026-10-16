@@ -1,0 +1,21 @@
+$ python scripts/verify_system.py --pg postgresql://postgres:@127.0.0.1:57303/postgres
+(cwd: .)
+
+PostgreSQL: PostgreSQL 16.2 on x86_64-pc-mingw64
+created empty database cloudshield_verify
+
+--- start 1 (fresh database) ---
+GET /health -> {'status': 'ok', 'database': 'ok', 'version': '2.0.0'}
+login OK, role: admin
+generated environment #1 seed 77, advanced 3 days -> sim time 2026-10-04T00:00:00
+scans stored: 2; open findings: 20; run-rate $3116.49
+UI served by the same process: GET / -> 200
+database now has 21 tables and 204 sim_resources rows
+
+--- server stopped; start 2 (same database) ---
+GET /health -> {'status': 'ok', 'database': 'ok', 'version': '2.0.0'}
+environment #1 sim time 2026-10-04T00:00:00 fingerprint b3bc03e68753ec9a
+scans stored: 2; open findings: 20
+PERSISTENCE AFTER RESTART: PASS - identical environment, clock, scans and findings
+
+[exit code 0, 11.1s]

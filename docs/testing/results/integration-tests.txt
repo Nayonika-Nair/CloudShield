@@ -1,0 +1,32 @@
+$ python -m pytest tests/test_integration_db.py tests/test_e2e_workflow.py -v -p no:cacheprovider
+(cwd: backend)
+
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.3.4, pluggy-1.7.0 -- C:\Users\bhuva\Downloads\abhinav_github\CloudShield-src\CloudShield\.venv\Scripts\python.exe
+rootdir: C:\Users\bhuva\Downloads\abhinav_github\CloudShield-src\CloudShield\backend
+plugins: anyio-4.15.1, platformdirs-4.13.3, cov-6.0.0
+collecting ... collected 13 items
+
+tests/test_integration_db.py::test_environment_round_trips_through_the_database_unchanged PASSED [  7%]
+tests/test_integration_db.py::test_relationships_and_inventory_rows_match_the_model PASSED [ 15%]
+tests/test_integration_db.py::test_save_applies_only_changes_and_history_is_append_only PASSED [ 23%]
+tests/test_integration_db.py::test_lifecycle_changes_persist_and_deleted_resources_disappear_from_inventory PASSED [ 30%]
+tests/test_integration_db.py::test_optimistic_locking_rejects_a_stale_writer PASSED [ 38%]
+tests/test_integration_db.py::test_failed_mutation_rolls_back_and_leaves_database_untouched PASSED [ 46%]
+tests/test_integration_db.py::test_scan_persists_findings_recommendations_and_reconciles_history PASSED [ 53%]
+tests/test_integration_db.py::test_findings_resolve_in_database_only_when_condition_disappears PASSED [ 61%]
+tests/test_integration_db.py::test_cost_engine_reads_persisted_history PASSED [ 69%]
+tests/test_integration_db.py::test_analysis_over_loaded_environment_equals_analysis_over_original PASSED [ 76%]
+tests/test_integration_db.py::test_only_one_environment_is_active_and_archived_ones_keep_their_rows PASSED [ 84%]
+tests/test_integration_db.py::test_state_version_counts_mutations_and_scans_record_the_version_they_saw PASSED [ 92%]
+tests/test_e2e_workflow.py::test_complete_cloudshield_workflow PASSED    [100%]
+
+============================== warnings summary ===============================
+..\.venv\Lib\site-packages\starlette\testclient.py:40
+  C:\Users\bhuva\Downloads\abhinav_github\CloudShield-src\CloudShield\.venv\Lib\site-packages\starlette\testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 13 passed, 1 warning in 10.82s ========================
+
+[exit code 0, 15.1s]

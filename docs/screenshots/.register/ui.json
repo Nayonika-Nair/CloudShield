@@ -1,0 +1,260 @@
+[
+  {
+    "file": "docs/screenshots/application/01-login.png",
+    "category": "application",
+    "title": "Sign-in screen",
+    "purpose": "Login view; credentials are validated by the API, not hard-coded in the page."
+  },
+  {
+    "file": "docs/screenshots/application/02-login-rejected.png",
+    "category": "application",
+    "title": "Rejected sign-in",
+    "purpose": "A wrong password is refused with a generic message (HTTP 401)."
+  },
+  {
+    "file": "docs/screenshots/application/03-dashboard.png",
+    "category": "application",
+    "title": "Dashboard (default environment)",
+    "purpose": "KPIs, security posture, cost trend, cost by service and compliance derived from the persisted simulated environment."
+  },
+  {
+    "file": "docs/screenshots/simulator/01-configuration.png",
+    "category": "simulator",
+    "title": "Simulator configuration",
+    "purpose": "Seed, region, resource counts, utilization, misconfiguration rates, quotas, time, pricing and scenario probabilities."
+  },
+  {
+    "file": "docs/screenshots/simulator/02-configuration-security-rates.png",
+    "category": "simulator",
+    "title": "Misconfiguration rates and scenario probabilities",
+    "purpose": "Clean preset: misconfiguration rates are zero, so no flaw exists until a scenario creates it."
+  },
+  {
+    "file": "docs/screenshots/simulator/03-generate-confirm.png",
+    "category": "simulator",
+    "title": "Generate confirmation",
+    "purpose": "Generation archives (does not delete) the previous environment and its history."
+  },
+  {
+    "file": "docs/screenshots/simulator/04-environment-generated.png",
+    "category": "simulator",
+    "title": "Environment generated",
+    "purpose": "Active environment panel shows the seed, simulated clock, fingerprint and resulting resource counts (16 EC2 instances)."
+  },
+  {
+    "file": "docs/screenshots/simulator/05-environments-history.png",
+    "category": "simulator",
+    "title": "Environment history",
+    "purpose": "The earlier environment is ARCHIVED, not erased; scans and audit history remain."
+  },
+  {
+    "file": "docs/screenshots/simulator/06-inventory.png",
+    "category": "simulator",
+    "title": "Resource inventory",
+    "purpose": "Paginated inventory of every simulated resource with state, key attributes, environment and monthly cost."
+  },
+  {
+    "file": "docs/screenshots/simulator/07-resource-detail.png",
+    "category": "simulator",
+    "title": "Resource detail drawer",
+    "purpose": "Per-resource properties, tags, metrics, relationships, network reachability explanation and the validated operations available."
+  },
+  {
+    "file": "docs/screenshots/simulator/08-network-topology-clean.png",
+    "category": "simulator",
+    "title": "Network topology (no exposure)",
+    "purpose": "VPCs, public/private subnets, internet gateways, instances, databases and security groups. Nothing is exposed on a sensitive port."
+  },
+  {
+    "file": "docs/screenshots/simulator/09-iam-analysis.png",
+    "category": "simulator",
+    "title": "IAM identity analysis",
+    "purpose": "Principals, admin detection, MFA and access-key status, trust relationships and the escalation graph."
+  },
+  {
+    "file": "docs/screenshots/security/01-findings-clean.png",
+    "category": "security",
+    "title": "Findings on the clean environment",
+    "purpose": "Before any scenario: no critical or high findings are detected."
+  },
+  {
+    "file": "docs/screenshots/simulator/10-time-and-scenarios.png",
+    "category": "simulator",
+    "title": "Simulated time and scenarios",
+    "purpose": "Manual clock controls and the ten scenarios; each changes state and names the rules expected to detect it."
+  },
+  {
+    "file": "docs/screenshots/simulator/11-scenario-triggered.png",
+    "category": "simulator",
+    "title": "Scenario applied",
+    "purpose": "State changed (a world-open SSH rule was added); the 'state changed since last scan' chip appears because no finding exists until a scan runs."
+  },
+  {
+    "file": "docs/screenshots/security/02-sg-before-remediation.png",
+    "category": "security",
+    "title": "Security group BEFORE remediation",
+    "purpose": "The scenario's security group allows tcp/22 from 0.0.0.0/0 (resource state, before the fix)."
+  },
+  {
+    "file": "docs/screenshots/security/03-findings-after-scan.png",
+    "category": "security",
+    "title": "Findings after the scenario and a scan",
+    "purpose": "A new HIGH finding NET-001 appears, derived from the changed security group, public address and route."
+  },
+  {
+    "file": "docs/screenshots/security/04-finding-evidence.png",
+    "category": "security",
+    "title": "Finding with evidence",
+    "purpose": "Explanation, impact, step-by-step reachability proof, detection rule, severity reason and timeline."
+  },
+  {
+    "file": "docs/screenshots/simulator/12-topology-exposed.png",
+    "category": "simulator",
+    "title": "Network topology with an exposed instance",
+    "purpose": "The instance is outlined red with 'EXPOSED 22' because the network model finds SSH reachable from the internet."
+  },
+  {
+    "file": "docs/screenshots/security/05-remediation-preview.png",
+    "category": "security",
+    "title": "Remediation preview (PROPOSED)",
+    "purpose": "Plan, risk, and a what-if comparison computed on an isolated copy: score before/after, cost, availability, config diff. Nothing has changed yet."
+  },
+  {
+    "file": "docs/screenshots/security/06-remediation-verified.png",
+    "category": "security",
+    "title": "Remediation executed and verified",
+    "purpose": "The change was applied to the simulated state, the analysis re-ran, and the condition is no longer detected (VERIFIED)."
+  },
+  {
+    "file": "docs/screenshots/security/07-sg-after-remediation.png",
+    "category": "security",
+    "title": "Security group AFTER remediation",
+    "purpose": "Same resource after remediation: the world-open SSH rule is gone (compare with the BEFORE screenshot)."
+  },
+  {
+    "file": "docs/screenshots/security/08-findings-resolved.png",
+    "category": "security",
+    "title": "Resolved finding kept in history",
+    "purpose": "The finding is RESOLVED because a re-scan no longer detects it; the record and its history remain."
+  },
+  {
+    "file": "docs/screenshots/security/09-finding-resolution-detail.png",
+    "category": "security",
+    "title": "Resolved finding detail",
+    "purpose": "Timeline, resolving scan, remediation record and verification result."
+  },
+  {
+    "file": "docs/screenshots/security/10-remediation-history.png",
+    "category": "security",
+    "title": "Remediation and verification history",
+    "purpose": "Proposed -> executed -> verified, with score and run-rate before/after."
+  },
+  {
+    "file": "docs/screenshots/security/11-scan-comparison.png",
+    "category": "security",
+    "title": "Scan history and comparison",
+    "purpose": "Compare two scans: resolved/introduced findings and score change."
+  },
+  {
+    "file": "docs/screenshots/security/12-detection-rules.png",
+    "category": "security",
+    "title": "Detection rules catalogue",
+    "purpose": "Each rule's logic and severity basis is documented and visible."
+  },
+  {
+    "file": "docs/screenshots/security/13-iam-escalation.png",
+    "category": "security",
+    "title": "IAM privilege escalation after a permissive role",
+    "purpose": "AdministratorAccess on a workload role creates escalation paths from ordinary users; red edges show the chain."
+  },
+  {
+    "file": "docs/screenshots/cost/01-cost-anomaly.png",
+    "category": "cost",
+    "title": "Cost analysis with a detected anomaly",
+    "purpose": "Daily cost chart with the spike flagged (z-score above baseline), by-service breakdown and contributors."
+  },
+  {
+    "file": "docs/screenshots/cost/02-cost-by-service.png",
+    "category": "cost",
+    "title": "Daily cost by service",
+    "purpose": "Stacked daily cost per service from simulated billing."
+  },
+  {
+    "file": "docs/screenshots/application/04-dashboard-after-scenarios.png",
+    "category": "application",
+    "title": "Dashboard after scenarios and a rescan",
+    "purpose": "Dashboard reflects the new findings, the cost anomaly and updated compliance posture."
+  },
+  {
+    "file": "docs/screenshots/cost/03-optimization.png",
+    "category": "cost",
+    "title": "Optimization recommendations",
+    "purpose": "Each recommendation shows evidence, estimated saving (labelled ESTIMATED), risk and the action to take."
+  },
+  {
+    "file": "docs/screenshots/cost/04-recommendation-evidence.png",
+    "category": "cost",
+    "title": "Recommendation evidence and assumptions",
+    "purpose": "Supporting metrics, assumptions, risk and the executable plan."
+  },
+  {
+    "file": "docs/screenshots/cost/05-recommendation-whatif.png",
+    "category": "cost",
+    "title": "Recommendation what-if preview",
+    "purpose": "Cost and security effect simulated before applying."
+  },
+  {
+    "file": "docs/screenshots/cost/06-recommendation-verified.png",
+    "category": "cost",
+    "title": "Recommendation applied and verified",
+    "purpose": "Run-rate before/after shows the verified (simulated) saving."
+  },
+  {
+    "file": "docs/screenshots/cost/07-recommendation-status-verified.png",
+    "category": "cost",
+    "title": "Verified recommendation",
+    "purpose": "Estimated and verified savings are shown separately."
+  },
+  {
+    "file": "docs/screenshots/simulator/13-whatif-result.png",
+    "category": "simulator",
+    "title": "What-if comparison",
+    "purpose": "Baseline vs hypothetical: cost, security score, availability, compliance and config diff; the baseline fingerprint is verified unchanged."
+  },
+  {
+    "file": "docs/screenshots/simulator/14-audit-log.png",
+    "category": "simulator",
+    "title": "Audit log",
+    "purpose": "Append-only record of generation, scenarios, scans, remediation, what-if and time changes with actor, outcome and details."
+  },
+  {
+    "file": "docs/screenshots/simulator/15-audit-event-detail.png",
+    "category": "simulator",
+    "title": "Audit event with before/after",
+    "purpose": "A remediation event stores the changed fields before and after."
+  },
+  {
+    "file": "docs/screenshots/simulator/16-configuration-drift.png",
+    "category": "simulator",
+    "title": "Configuration drift",
+    "purpose": "Resources whose configuration differs from the saved baseline; security-relevant drift first. Drift is not a finding."
+  },
+  {
+    "file": "docs/screenshots/application/05-report-generated.png",
+    "category": "application",
+    "title": "Generated report",
+    "purpose": "Report built from persisted state: score, run-rate, estimated vs verified savings, remediation evidence, limitations."
+  },
+  {
+    "file": "docs/screenshots/application/06-api-docs.png",
+    "category": "application",
+    "title": "OpenAPI documentation",
+    "purpose": "FastAPI /docs listing the simulator, analysis, remediation, what-if, audit and report endpoints."
+  },
+  {
+    "file": "docs/screenshots/application/07-viewer-readonly.png",
+    "category": "application",
+    "title": "Read-only viewer role",
+    "purpose": "A viewer sees a notice and cannot generate environments or change state (also enforced by the API with HTTP 403)."
+  }
+]

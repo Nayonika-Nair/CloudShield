@@ -24,6 +24,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 VENV_BIN = ROOT / ".venv" / "Scripts"
+PYTHON = (VENV_BIN / "python.exe").as_posix()   # absolute: a bare "python" resolved to another interpreter without the dependencies
 OUT = ROOT / "docs" / "testing" / "mutation"
 WORK = ROOT / ".tmp" / "mut"
 
@@ -88,6 +89,7 @@ def run_one(name: str, sample: int | None = None, seed: int = 2026) -> dict:
     (ROOT / "frontend").exists()
     shutil.copytree(ROOT / "frontend", work / "frontend", ignore=shutil.ignore_patterns("node_modules"))
     backend = work / "backend"
+    shutil.copy(ROOT / "scripts" / "cr_test.py", backend / "cr_test.py")
     toml = backend / "cosmic-ray.toml"
     toml.write_text(
         f'[cosmic-ray]\nmodule-path = "{module}"\ntimeout = 90.0\nexcluded-modules = []\n'
@@ -99,19 +101,30 @@ def run_one(name: str, sample: int | None = None, seed: int = 2026) -> dict:
     init = sh("cosmic-ray init cosmic-ray.toml session.sqlite", backend, env)
     if init.returncode != 0:
         return {"name": name, "error": init.stderr[-500:]}
+    # Baseline: the unmutated tests must pass with exactly the command Cosmic Ray will run, otherwise every mutant would look 'killed'.
+    import shlex
+    base = subprocess.run(shlex.split(f"{PYTHON} cr_test.py {tests}"), cwd=backend, capture_output=True,
+                          env=dict(env, PYTHONDONTWRITEBYTECODE="1"))
+    if base.returncode != 0:
+        return {"name": name, "error": "baseline failed: " + base.stdout.decode()[-300:] + base.stderr.decode()[-300:]}
     pruned = prune_session(session, backend / module, sample, seed)
     execp = sh("cosmic-ray exec cosmic-ray.toml session.sqlite", backend, env)
     report = sh("cr-report session.sqlite --show-pending", backend, env).stdout
     survivors = sh("cr-report session.sqlite --surviving-only --show-diff", backend, env).stdout
+    db = sqlite3.connect(session)
+    counts = dict(db.execute("select test_outcome, count(*) from work_results group by 1").fetchall())
+    genuine = db.execute("select count(*) from work_results where test_outcome='KILLED' and (output like '%FAILED %' or output like '%Error%' or output='timeout')").fetchone()[0]
+    db.close()
+    killed, survived, incompetent = counts.get("KILLED", 0), counts.get("SURVIVED", 0), counts.get("INCOMPETENT", 0)
     total = int(re.search(r"total jobs: (\d+)", report).group(1))
-    surv = int(re.search(r"surviving mutants: (\d+)", report).group(1))
-    complete = int(re.search(r"complete: (\d+)", report).group(1))
+    complete = killed + survived + incompetent
+    surv = survived
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / f"{name}.survivors.txt").write_text(survivors, encoding="utf-8")
     result = {
         "name": name, "label": label, "module": module, "tests": tests, "total": total, "complete": complete, **pruned, "seed": seed,
-        "survived": surv, "killed": complete - surv,
-        "score_pct": round((complete - surv) / complete * 100, 1) if complete else None,
+        "survived": surv, "killed": killed, "killed_with_failing_test_output": genuine, "incompetent": incompetent, "baseline_passed": True,
+        "score_pct": round(genuine / (genuine + surv) * 100, 1) if (genuine + surv) else None,
         "seconds": round(time.time() - start), "exec_returncode": execp.returncode,
     }
     (OUT / f"{name}.json").write_text(json.dumps(result, indent=2), encoding="utf-8")

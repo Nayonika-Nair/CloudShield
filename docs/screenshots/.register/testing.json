@@ -1,0 +1,65 @@
+[
+  {
+    "file": "docs/screenshots/testing/unit-tests.png",
+    "category": "testing",
+    "title": "Unit tests: generator, lifecycle, network, IAM, rules, cost, time, what-if",
+    "purpose": "Unit-test evidence: seed reproducibility, lifecycle validation, reachability, IAM evaluation, detection rules, cost arithmetic, anomaly detection, what-if isolation.",
+    "source_output": "docs/testing/results/unit-tests.txt",
+    "rc": 0,
+    "expected_rc": 0
+  },
+  {
+    "file": "docs/screenshots/testing/integration-tests.png",
+    "category": "testing",
+    "title": "Integration tests: simulator <-> database, engines <-> persisted history",
+    "purpose": "Integration-testing evidence (simulator and database, optimistic locking, transactions, scan reconciliation).",
+    "source_output": "docs/testing/results/integration-tests.txt",
+    "rc": 0,
+    "expected_rc": 0
+  },
+  {
+    "file": "docs/screenshots/testing/api-tests.png",
+    "category": "testing",
+    "title": "API tests: auth, roles, validation, GET purity, audit, remediation, what-if, reports",
+    "purpose": "API-level evidence: valid and invalid input, unauthorised calls, missing resources, duplicate operations, read-only GETs, what-if isolation, audit creation.",
+    "source_output": "docs/testing/results/api-tests.txt",
+    "rc": 0,
+    "expected_rc": 0
+  },
+  {
+    "file": "docs/screenshots/testing/regression-tests.png",
+    "category": "testing",
+    "title": "Regression tests: original CloudShield behaviour",
+    "purpose": "Regression evidence: original authentication, mock provider, label-based engines, original API routes and persistence still behave as before.",
+    "source_output": "docs/testing/results/regression-tests.txt",
+    "rc": 0,
+    "expected_rc": 0
+  },
+  {
+    "file": "docs/screenshots/testing/frontend-contract-tests.png",
+    "category": "testing",
+    "title": "Frontend integration contract tests",
+    "purpose": "Every API call made by the UI exists in the backend OpenAPI document; every button/handler is wired.",
+    "source_output": "docs/testing/results/frontend-contract-tests.txt",
+    "rc": 0,
+    "expected_rc": 0
+  },
+  {
+    "file": "docs/screenshots/testing/full-suite-coverage.png",
+    "category": "testing",
+    "title": "Full suite on SQLite with coverage",
+    "purpose": "Complete test run with line coverage of the application package.",
+    "source_output": "docs/testing/results/full-suite-coverage.txt",
+    "rc": 0,
+    "expected_rc": 0
+  },
+  {
+    "file": "docs/screenshots/testing/full-suite-postgres.png",
+    "category": "testing",
+    "title": "Full suite on PostgreSQL 16",
+    "purpose": "The same suite executed against a real PostgreSQL 16 server (TEST_DATABASE_URL).",
+    "source_output": "docs/testing/results/full-suite-postgres.txt",
+    "rc": 0,
+    "expected_rc": 0
+  }
+]

@@ -1,0 +1,19 @@
+$ python scripts/validate_compose.py
+(cwd: .)
+
+services: db, backend, frontend
+- db: image postgres:16-alpine
+    healthcheck: CMD-SHELL (interval 5s)
+- backend: build ./backend, ports ['8000:8000']
+    healthcheck: CMD (interval 10s)
+    depends_on db: service_healthy
+- frontend: build ./frontend, ports ['3000:80']
+    depends_on backend: service_healthy
+volumes: ['cloudshield-pgdata']
+backend/Dockerfile: base python:3.12-slim, 18 lines
+frontend/Dockerfile: base nginx:alpine, 6 lines
+compose variables: ADMIN_EMAIL, ADMIN_PASSWORD, ANALYST_EMAIL, ANALYST_PASSWORD, CORS_ORIGINS, JWT_SECRET_KEY, POSTGRES_DB, POSTGRES_PASSWORD, POSTGRES_USER, SEED_DEMO_ENVIRONMENT, SIM_AUTO_ADVANCE_SECONDS, VIEWER_EMAIL, VIEWER_PASSWORD
+missing from .env.example: none
+RESULT: OK - static checks passed (image build NOT executed)
+
+[exit code 0, 0.3s]
