@@ -1,9 +1,13 @@
 $ git log --graph --oneline --decorate --all -n 40
 (cwd: .)
 
-* bf27885 (HEAD -> feature/documentation-evidence) Add captured UI/terminal evidence, test results and evidence register
-* 8f61b73 Add diagrams, evidence tooling, report builders and README rewrite
-*   612cd20 (develop) Merge feature/frontend-integration into develop
+*   1b7d966 (HEAD -> develop) Merge feature/documentation-evidence into develop
+|\  
+| * f835303 (feature/documentation-evidence) test: hardening tests for surviving mutants; two-round mutation results
+| * bf27885 Add captured UI/terminal evidence, test results and evidence register
+| * 8f61b73 Add diagrams, evidence tooling, report builders and README rewrite
+|/  
+*   612cd20 Merge feature/frontend-integration into develop
 |\  
 | * f629a96 (feature/frontend-integration) Integrate the frontend with the simulator API
 |/  

@@ -3,13 +3,14 @@ $ git remote -v && git status -sb && git shortlog -sn --all
 
 origin	https://github.com/Nayonika-Nair/CloudShield.git (fetch)
 origin	https://github.com/Nayonika-Nair/CloudShield.git (push)
-## feature/documentation-evidence
-?? docs/screenshots/version-management/
-?? docs/testing/results/git-branches.txt
-?? docs/testing/results/git-graph.txt
+## develop
+ M docs/screenshots/version-management/git-branches.png
+ M docs/screenshots/version-management/git-graph.png
+ M docs/testing/results/git-branches.txt
+ M docs/testing/results/git-graph.txt
     16	drunkenmonkey010
-    11	Boo@1230
+    13	Boo@1230
      4	Nayonika Nair
      3	Nayonika-Nair
 
-[exit code 0, 0.3s]
+[exit code 0, 0.4s]

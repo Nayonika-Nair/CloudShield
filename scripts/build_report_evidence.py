@@ -111,9 +111,9 @@ def main():
                 "<b>Round 1</b> used the module's targeted pytest files and scored " + f"{t['score_round1']}%" + ". The survivors were then read, boundary and exactness tests "
                 "were written for them (<font name='Courier'>test_hardening_*.py</font>), and <b>round 2</b> re-ran only those survivors against the original plus the hardening tests; "
                 "kills from round 1 were kept unchanged. A kill counts only if the recorded output shows a failing test.")]
-        rows = [[m["module"], m["label"], m["generated"], m["annotation_excluded"], m["complete"], m["killed"], m["survived"], f"{m['round1']['score_pct']}%", f"{m['score_pct']}%"] for m in mut]
+        rows = [[m["module"].split("/")[-1], m["label"], m["generated"], m["annotation_excluded"], m["complete"], m["killed"], m["survived"], f"{m['round1']['score_pct']}%", f"{m['score_pct']}%"] for m in mut]
         rows.append(["<b>All</b>", "", t["generated"], t["annotation"], t["tested"], t["killed"], t["survived"], f"{t['score_round1']}%", f"{t['score']}%"])
-        s += table(doc, ["Module", "Covers", "Generated", "Annotation (excluded)", "Tested", "Killed", "Survived", "Round 1", "Final"], rows, [32, 44, 14, 17, 12, 11, 12, 13, 13],
+        s += table(doc, ["Module", "Covers", "Gen.", "Annot. (excl.)", "Tested", "Killed", "Surv.", "Round 1", "Final"], rows, [30, 42, 15, 16, 13, 13, 13, 14, 14],
                    caption="Mutation testing results exactly as recorded by scripts/run_mutation.py (docs/testing/mutation/*.json; round 1 in docs/testing/mutation-round1). Score = killed / (killed + survived); incompetent mutants are excluded.")
         surv = [m for m in mut if m["survived"]]
         s += [p("<b>Surviving mutants.</b> " + (
