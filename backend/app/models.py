@@ -37,6 +37,14 @@ class User(Base):
         nullable=False,
     )
 
+    # admin | analyst | viewer  (controls access to simulator write operations)
+    role = Column(
+        String(20),
+        nullable=False,
+        default="viewer",
+        server_default="viewer",
+    )
+
     created_at = Column(
         DateTime,
         nullable=False,
@@ -370,3 +378,9 @@ class Scan(Base):
         nullable=False,
         default=0,
     )
+
+# ============================================================
+# Fake AWS simulator tables (registered on the same metadata)
+# ============================================================
+
+from app import sim_models  # noqa: E402,F401

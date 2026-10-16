@@ -204,4 +204,5 @@ class Token(BaseModel):
 class UserResponse(BaseModel):
     id: int
     email: EmailStr
+    role: str = "viewer"
     created_at: Any
